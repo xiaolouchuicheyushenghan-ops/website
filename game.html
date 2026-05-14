@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>真言 · A学院纪事</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-hua: #e8704a;
+      --color-leian: #52b788;
+      --color-narrator: #c9b99a;
+      --color-inner: #ffd166;
+      --dialog-bg: rgba(4, 4, 12, 0.84);
+      --choice-bg: rgba(6, 6, 18, 0.90);
+      --font: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', '宋体', serif;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #08070f;
+      font-family: var(--font);
+    }
+
+    /* ═══ GAME CONTAINER ═══ */
+    #game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ═══ BACKGROUND LAYERS ═══ */
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: opacity 0.9s ease;
+    }
+    #bg-a { z-index: 1; }
+    #bg-b { z-index: 2; opacity: 0; }
+
+    /* subtle vignette overlay */
+    #vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+    }
+
+    /* ═══ FLOATING PARTICLES ═══ */
+    #particles {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: float-up linear infinite;
+      opacity: 0;
+    }
+    @keyframes float-up {
+      0%   { transform: translateY(110vh) translateX(0);              opacity: 0; }
+      8%   { opacity: 0.9; }
+      85%  { opacity: 0.3; }
+      100% { transform: translateY(-30px) translateX(var(--drift));   opacity: 0; }
+    }
+
+    /* ═══ SCENE LABEL ═══ */
+    #scene-label {
+      position: absolute;
+      top: clamp(14px, 2.5vh, 24px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      color: rgba(255,255,255,0.28);
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 0.6s ease;
+    }
+
+    /* ═══ CHARACTER AREA ═══ */
+    #character-wrap {
+      position: absolute;
+      bottom: calc(30% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      transition: opacity 0.5s ease;
+    }
+    #char-badge {
+      width: clamp(70px, 12vw, 110px);
+      height: clamp(70px, 12vw, 110px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 700;
+      border: 2px solid currentColor;
+      opacity: 0.82;
+      transition: color 0.5s ease, box-shadow 0.5s ease;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(4px);
+    }
+
+    /* ═══ DIALOG BOX ═══ */
+    #dialog-area {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 20;
+      padding: 0 clamp(16px,5vw,80px) clamp(18px,3.5vh,36px);
+    }
+    #dialog-box {
+      background: var(--dialog-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 10px;
+      padding: clamp(16px,2.5vh,26px) clamp(20px,3vw,36px);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      min-height: clamp(110px,20vh,150px);
+    }
+    #char-name-box {
+      font-size: clamp(0.78rem,1.4vw,0.96rem);
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      margin-bottom: 10px;
+      padding-left: 2px;
+      transition: color 0.35s ease;
+    }
+    #dialog-text {
+      font-size: clamp(0.9rem,1.7vw,1.1rem);
+      line-height: 1.9;
+      color: #e2dbd2;
+      min-height: 3.4em;
+      word-break: break-all;
+    }
+    #continue-hint {
+      position: absolute;
+      bottom: 13px; right: 18px;
+      color: rgba(255,255,255,0.35);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      display: none;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 0.35; }
+      50%      { opacity: 0.9; }
+    }
+
+    /* ═══ CHOICES ═══ */
+    #choices-panel {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 30;
+      padding: 0 clamp(16px,5vw,80px) clamp(18px,3.5vh,36px);
+      display: none;
+    }
+    .choices-wrap {
+      background: var(--choice-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+    }
+    .choice-hint-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.28);
+      text-align: center;
+      letter-spacing: 0.25em;
+      padding: 7px 0 4px;
+    }
+    .choice-btn {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 7px;
+      color: #ccc6be;
+      font-family: var(--font);
+      font-size: clamp(0.88rem,1.55vw,1.02rem);
+      padding: clamp(11px,1.7vh,16px) clamp(14px,2.5vw,22px);
+      margin-top: 5px;
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.55;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+    .choice-btn:hover, .choice-btn:focus {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.28);
+      color: #fff;
+      outline: none;
+    }
+    .choice-prefix {
+      color: rgba(255,255,255,0.3);
+      margin-right: 8px;
+      font-size: 0.75em;
+      vertical-align: middle;
+    }
+
+    /* ═══ TITLE SCREEN ═══ */
+    #title-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: linear-gradient(160deg, #08050f 0%, #110820 50%, #080510 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1s ease;
+    }
+    #title-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .title-eyebrow {
+      color: rgba(255,255,255,0.18);
+      font-size: clamp(0.6rem,1.1vw,0.78rem);
+      letter-spacing: 0.55em;
+      margin-bottom: 22px;
+    }
+    .title-zh {
+      font-size: clamp(3.5rem,8vw,6rem);
+      font-weight: 700;
+      color: #f0e8df;
+      letter-spacing: 0.3em;
+      text-shadow: 0 0 80px rgba(220,140,80,0.25);
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+    .title-sub-zh {
+      font-size: clamp(0.78rem,1.3vw,1rem);
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.45em;
+      margin-bottom: 56px;
+    }
+    .title-rule {
+      width: 1px;
+      height: 44px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.28), transparent);
+      margin-bottom: 36px;
+    }
+    #start-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.72);
+      font-family: var(--font);
+      font-size: clamp(0.8rem,1.3vw,0.95rem);
+      letter-spacing: 0.45em;
+      padding: 13px 50px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    #start-btn:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.45);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(255,255,255,0.05);
+    }
+    .title-version {
+      margin-top: 20px;
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.12);
+      letter-spacing: 0.2em;
+    }
+
+    /* ═══ CARD GALLERY BUTTON ═══ */
+    #card-gallery-btn {
+      position: absolute;
+      bottom: clamp(14px,2.5vh,24px);
+      right: clamp(16px,3vw,30px);
+      z-index: 50;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.4);
+      font-family: var(--font);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 7px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #card-gallery-btn:hover {
+      color: rgba(255,255,255,0.8);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    /* ═══ CARD GALLERY OVERLAY ═══ */
+    #card-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 80;
+      background: rgba(4,3,10,0.95);
+      backdrop-filter: blur(6px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(20px,4vh,50px) clamp(20px,4vw,60px);
+      overflow-y: auto;
+    }
+    #card-overlay.open { display: flex; }
+    .gallery-title {
+      font-size: clamp(1rem,2vw,1.4rem);
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.3em;
+      margin-bottom: 30px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+      width: 100%;
+      max-width: 700px;
+    }
+    .card-item {
+      aspect-ratio: 3/4;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255,255,255,0.02);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .card-item:hover::before { opacity: 1; }
+    .card-item:hover {
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-3px);
+    }
+    .card-badge {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: rgba(0,0,0,0.4);
+    }
+    .card-name {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+    }
+    .card-attr {
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.15em;
+    }
+    .card-locked {
+      filter: blur(2px) grayscale(0.8);
+      opacity: 0.4;
+    }
+    .card-locked::after {
+      content: '🔒';
+      position: absolute;
+      font-size: 1.5rem;
+      filter: none;
+    }
+    #gallery-close {
+      margin-top: 30px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.5);
+      font-family: var(--font);
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      padding: 9px 28px;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    #gallery-close:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+
+    /* ═══ MOBILE ═══ */
+    @media (max-width: 600px) {
+      #character-wrap { bottom: calc(28% + 8px); }
+    }
+    @media (max-height: 550px) {
+      #character-wrap { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div id="game">
+
+  <!-- Backgrounds -->
+  <div id="bg-a" class="bg-layer"></div>
+  <div id="bg-b" class="bg-layer"></div>
+  <div id="vignette"></div>
+
+  <!-- Particles -->
+  <div id="particles"></div>
+
+  <!-- Scene label -->
+  <div id="scene-label"></div>
+
+  <!-- Character badge -->
+  <div id="character-wrap">
+    <div id="char-badge"></div>
+  </div>
+
+  <!-- Dialog -->
+  <div id="dialog-area">
+    <div id="dialog-box">
+      <div id="char-name-box"></div>
+      <div id="dialog-text"></div>
+      <div id="continue-hint">点击继续 ▶</div>
+    </div>
+  </div>
+
+  <!-- Choices -->
+  <div id="choices-panel">
+    <div class="choices-wrap">
+      <div class="choice-hint-text">— 做 出 选 择 —</div>
+      <div id="choices-list"></div>
+    </div>
+  </div>
+
+  <!-- Card gallery button -->
+  <button id="card-gallery-btn">图 鉴</button>
+
+  <!-- Card gallery overlay -->
+  <div id="card-overlay">
+    <div class="gallery-title">· 人 物 图 鉴 ·</div>
+    <div class="card-grid" id="card-grid"></div>
+    <button id="gallery-close">关 闭</button>
+  </div>
+
+  <!-- Title screen -->
+  <div id="title-screen">
+    <div class="title-eyebrow">A C A D E M Y · C H R O N I C L E S</div>
+    <div class="title-zh">真　言</div>
+    <div class="title-sub-zh">A 学 院 纪 事</div>
+    <div class="title-rule"></div>
+    <button id="start-btn">开 始 故 事</button>
+    <div class="title-version">序章 · 入学之日</div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  GAME DATA
+// ════════════════════════════════════════════
+const CHARS = {
+  narrator: { name: '旁白',           color: '#c9b99a', initial: '·',  glow: 'rgba(201,185,154,0.3)' },
+  inner:    { name: '〔内心〕',        color: '#ffd166', initial: '心',  glow: 'rgba(255,209,102,0.3)' },
+  hua:      { name: '华·洛佩兹',      color: '#e8704a', initial: '华',  glow: 'rgba(232,112,74,0.35)' },
+  leian:    { name: '莱安·斯图尔特',  color: '#52b788', initial: '莱',  glow: 'rgba(82,183,136,0.35)' },
+};
+
+const BG = {
+  night_gate:   'linear-gradient(180deg, #080614 0%, #0f0c1e 45%, #19122a 100%)',
+  hall_day:     'linear-gradient(180deg, #090d1a 0%, #111828 50%, #1a2035 100%)',
+  corridor:     'linear-gradient(180deg, #07080f 0%, #0d0f1c 60%, #141626 100%)',
+  outside_dusk: 'linear-gradient(160deg, #100808 0%, #1f0e0a 40%, #2b1510 100%)',
+  fire_glow:    'linear-gradient(180deg, #0e0400 0%, #200800 50%, #2e0e04 100%)',
+  forest_deep:  'linear-gradient(180deg, #030f06 0%, #081508 50%, #0d1e10 100%)',
+  academy_dawn: 'linear-gradient(180deg, #060810 0%, #0e1020 50%, #181525 100%)',
+  end_screen:   'linear-gradient(160deg, #08050f 0%, #100815 100%)',
+};
+
+const CARDS = [
+  { id: 'hua',   name: '华·洛佩兹',     attr: '火属性 · 法师', initial: '华', color: '#e8704a', bg: BG.fire_glow,   locked: false },
+  { id: 'leian', name: '莱安·斯图尔特', attr: '木属性 · 法师', initial: '莱', color: '#52b788', bg: BG.forest_deep, locked: true  },
+];
+
+const SCENES = {
+
+  // ─── 序章 ───
+  prologue_01: {
+    bg: BG.night_gate, label: '2019年 · 深秋 · A学院',
+    char: 'narrator', initial: false,
+    text: '2019年，深秋。\n\nA学院矗立于城市北郊的丘陵之上，有百年历史。入学通知书上，校徽的压纹微微泛着暗金色的光。',
+    next: 'prologue_02',
+  },
+
+  prologue_02: {
+    bg: BG.night_gate, label: '2019年 · 深秋 · A学院',
+    char: 'narrator', initial: false,
+    text: '每一届新生，都将在这里继承自己家族的义务与能力——\n\n这是学院存在的意义，也是传承数代的契约。',
+    next: 'prologue_03',
+  },
+
+  prologue_03: {
+    bg: BG.night_gate, label: '2019年 · 深秋 · A学院正门',
+    char: 'hua', initial: true,
+    text: '……到了。',
+    next: 'prologue_04',
+  },
+
+  prologue_04: {
+    bg: BG.night_gate, label: '2019年 · 深秋 · A学院正门',
+    char: 'inner',
+    text: '（大门比他想象中的更高。铁制的门柱上刻着他一点都不陌生的家徽——洛佩兹家的火焰纹。）\n\n（已经被抹去了。）',
+    next: 'prologue_05',
+  },
+
+  prologue_05: {
+    bg: BG.night_gate, label: '2019年 · 深秋 · A学院正门',
+    char: 'hua',
+    text: '……没关系。\n\n总有一天，我会把它刻回来的。',
+    next: 'gate_01',
+  },
+
+  // ─── 正门 → 入学登记 ───
+  gate_01: {
+    bg: BG.hall_day, label: 'A学院 · 主楼大厅',
+    char: 'narrator', initial: false,
+    text: '大厅里已经聚集了许多新生。西装革履的，锦衣华服的，也有像他这样穿着朴素的——\n\n但大多数人都低着头，各自心事重重。',
+    next: 'gate_choice',
+  },
+
+  gate_choice: {
+    bg: BG.hall_day, label: 'A学院 · 主楼大厅',
+    char: 'hua',
+    text: '（登记处的队伍很长。远处走廊里隐约有几个高年级的学生在指指点点。）',
+    choices: [
+      { text: '先去办理入学登记，别引起不必要的注意。', next: 'path_register' },
+      { text: '先观察一下周围，摸清楚这里的状况。',       next: 'path_observe'  },
+    ],
+  },
+
+  // ─── 路线A：登记 ───
+  path_register: {
+    bg: BG.hall_day, label: 'A学院 · 登记窗口',
+    char: 'narrator', initial: false,
+    text: '华·洛佩兹在队伍里安静地等了将近半小时。\n\n登记官翻了翻名册，停顿了一瞬。然后面无表情地盖上印章，推过去一枚铜制徽章。',
+    next: 'register_01',
+  },
+
+  register_01: {
+    bg: BG.hall_day, label: 'A学院 · 登记窗口',
+    char: 'narrator', initial: false,
+    text: '徽章的背面刻着编号：2019-F-07。\n\n"F"代表火属性。',
+    next: 'register_02',
+  },
+
+  register_02: {
+    bg: BG.hall_day, label: 'A学院 · 登记窗口',
+    char: 'inner',
+    text: '（没有人多看他一眼。）\n\n（这很好。）',
+    next: 'encounter_setup',
+  },
+
+  // ─── 路线B：观察 ───
+  path_observe: {
+    bg: BG.hall_day, label: 'A学院 · 主楼大厅',
+    char: 'narrator', initial: false,
+    text: '他在人群边缘找了个角落。从这里可以看到整个大厅。\n\n各个家族的徽章——他都认得。那个枫叶纹是斯图尔特家的。那个……消失了的，是他自己家的。',
+    next: 'observe_01',
+  },
+
+  observe_01: {
+    bg: BG.hall_day, label: 'A学院 · 主楼大厅',
+    char: 'narrator', initial: false,
+    text: '靠近窗边的那个人，一件深色校服，立领系得一丝不苟——\n\n他正在和一群人说话。不是聊天，是在答复汇报。',
+    next: 'observe_02',
+  },
+
+  observe_02: {
+    bg: BG.hall_day, label: 'A学院 · 主楼大厅',
+    char: 'inner',
+    text: '（学生会的人。据说今年的学生会主席是斯图尔特家的孩子，笔试第一，实战前五。）\n\n（真言负荷的继承者。）',
+    next: 'encounter_setup',
+  },
+
+  // ─── 汇合点：初遇 ───
+  encounter_setup: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'narrator', initial: false,
+    text: '走廊的尽头，那个高挑的身影转过来，目光扫过人群——\n\n然后停在了华·洛佩兹身上。',
+    next: 'encounter_01',
+  },
+
+  encounter_01: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'leian', initial: true,
+    text: '你在这里站了很久了。',
+    next: 'encounter_02',
+  },
+
+  encounter_02: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'narrator', initial: false,
+    text: '这不是问句。',
+    next: 'encounter_03',
+  },
+
+  encounter_03: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'hua',
+    text: '是的。谢谢关心。',
+    next: 'encounter_04',
+  },
+
+  encounter_04: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'leian',
+    text: '你不在名册上。',
+    next: 'encounter_05',
+  },
+
+  encounter_05: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'inner',
+    text: '（他已经查过了？）\n\n（当然。学生会主席。）',
+    next: 'encounter_06',
+  },
+
+  encounter_06: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'leian',
+    text: '洛佩兹家已经没有在册成员了。\n\n你是怎么进来的？',
+    next: 'encounter_choice',
+  },
+
+  encounter_choice: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'hua',
+    text: '（周围的人都安静了下来。）',
+    choices: [
+      { text: '「参加了入学考试。和其他人一样。」', next: 'response_honest'   },
+      { text: '「这是我和学院之间的事。」',          next: 'response_deflect' },
+    ],
+  },
+
+  // ─── 回应A：坦白 ───
+  response_honest: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'hua',
+    text: '参加了入学考试。笔试第三，实战第一。\n\n如果你查过名册，应该也查过分数线。',
+    next: 'leian_reacts_01',
+  },
+
+  // ─── 回应B：偏转 ───
+  response_deflect: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'hua',
+    text: '这是我和学院之间的事，\n\n还不到学生会过问的时候。',
+    next: 'leian_reacts_01',
+  },
+
+  // ─── 汇合 ───
+  leian_reacts_01: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'narrator', initial: false,
+    text: '莱安·斯图尔特沉默了片刻。\n\n周围的人都屏住了呼吸。',
+    next: 'leian_reacts_02',
+  },
+
+  leian_reacts_02: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'leian',
+    text: '你的火属性是什么级别？',
+    next: 'leian_reacts_03',
+  },
+
+  leian_reacts_03: {
+    bg: BG.outside_dusk, label: 'A学院 · 走廊',
+    char: 'hua',
+    text: '目前是三级。\n\n（顿一顿）\n\n但还在成长。',
+    next: 'leian_reacts_04',
+  },
+
+  leian_reacts_04: {
+    bg: BG.outside_dusk, label: 'A学院 · 走廊',
+    char: 'narrator', initial: false,
+    text: '莱安·斯图尔特没再说什么。\n\n他转过身，走廊里的人群自动分开，像潮水一样让出了路。',
+    next: 'day1_end_01',
+  },
+
+  day1_end_01: {
+    bg: BG.academy_dawn, label: 'A学院 · 宿舍楼 · 夜',
+    char: 'hua',
+    text: '（窗外，A学院的钟楼亮着灯。）',
+    next: 'day1_end_02',
+  },
+
+  day1_end_02: {
+    bg: BG.academy_dawn, label: 'A学院 · 宿舍楼 · 夜',
+    char: 'inner',
+    text: '（斯图尔特家的木属性，据说能感知万物的盛衰。）\n\n（他今天看我的眼神……不是轻视。）\n\n（是在衡量。）',
+    next: 'day1_end_03',
+  },
+
+  day1_end_03: {
+    bg: BG.academy_dawn, label: 'A学院 · 宿舍楼 · 夜',
+    char: 'hua',
+    text: '没关系。\n\n复仇本来就需要时间。',
+    next: 'epilogue',
+  },
+
+  epilogue: {
+    bg: BG.end_screen, label: '序章 · 终',
+    char: 'narrator', initial: false,
+    text: '这是2019年，深秋，入学之日。\n\n华·洛佩兹和莱安·斯图尔特，在还不知道彼此会如何改变对方命运的时候，第一次站在了同一条走廊上。',
+    next: 'THE_END',
+  },
+};
+
+// ════════════════════════════════════════════
+//  ENGINE
+// ════════════════════════════════════════════
+let state = {
+  sceneId: 'prologue_01',
+  typing: false,
+  typingTimer: null,
+  bgActive: 'a',    // which layer is currently "on"
+  currentBg: null,
+  particleColor: '#e8704a',
+};
+
+const $  = id => document.getElementById(id);
+const el = {
+  bgA:       $('bg-a'),
+  bgB:       $('bg-b'),
+  particles: $('particles'),
+  sceneLabel:$('scene-label'),
+  charWrap:  $('character-wrap'),
+  charBadge: $('char-badge'),
+  dialogBox: $('dialog-box'),
+  charName:  $('char-name-box'),
+  dialogText:$('dialog-text'),
+  hint:      $('continue-hint'),
+  choices:   $('choices-panel'),
+  choiceList:$('choices-list'),
+  title:     $('title-screen'),
+  cardBtn:   $('card-gallery-btn'),
+  cardOverlay:$('card-overlay'),
+  cardGrid:  $('card-grid'),
+};
+
+// ── Background ──
+function setBg(bgDef) {
+  if (bgDef === state.currentBg) return;
+  state.currentBg = bgDef;
+
+  const incoming = state.bgActive === 'a' ? el.bgB : el.bgA;
+  const outgoing  = state.bgActive === 'a' ? el.bgA : el.bgB;
+
+  const val = bgDef.startsWith('url(') ? bgDef : bgDef;
+  incoming.style.background = val;
+  incoming.style.backgroundSize = 'cover';
+  incoming.style.backgroundPosition = 'center';
+  incoming.style.opacity = '1';
+  outgoing.style.opacity  = '0';
+
+  state.bgActive = state.bgActive === 'a' ? 'b' : 'a';
+}
+
+// ── Character badge ──
+function setCharacter(charKey) {
+  const char = CHARS[charKey];
+  if (!char || charKey === 'narrator') {
+    el.charWrap.style.opacity = '0';
+    return;
+  }
+  el.charWrap.style.opacity = '1';
+  el.charBadge.textContent  = char.initial;
+  el.charBadge.style.color  = char.color;
+  el.charBadge.style.boxShadow = `0 0 28px ${char.glow}, 0 0 8px rgba(0,0,0,0.6)`;
+  updateParticles(charKey);
+}
+
+// ── Particles ──
+function initParticles() {
+  el.particles.innerHTML = '';
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 2.5 + 1;
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${size}px;
+      height: ${size}px;
+      background: ${state.particleColor};
+      animation-duration: ${Math.random() * 8 + 7}s;
+      animation-delay: ${Math.random() * 10}s;
+      --drift: ${(Math.random() - 0.5) * 80}px;
+      box-shadow: 0 0 4px ${state.particleColor};
+    `;
+    el.particles.appendChild(p);
+  }
+}
+
+function updateParticles(charKey) {
+  const colors = { hua: '#ff8855', leian: '#55cc88', narrator: '#aa9977', inner: '#ffcc55' };
+  const newColor = colors[charKey] || '#aa9977';
+  if (newColor === state.particleColor) return;
+  state.particleColor = newColor;
+  initParticles();
+}
+
+// ── Typewriter ──
+function typewrite(text, el, onDone) {
+  el.textContent = '';
+  state.typing = true;
+  el.parentElement.querySelector('#continue-hint').style.display = 'none';
+
+  // Handle newlines
+  const lines = text.split('\n');
+  let fullHtml = lines.join('<br>');
+  const plainChars = text.replace(/\n/g, ' ').split('');
+  let i = 0;
+
+  function tick() {
+    if (i >= plainChars.length) {
+      el.innerHTML = fullHtml;
+      state.typing = false;
+      if (onDone) onDone();
+      return;
+    }
+    // Rebuild up to char i in the plain text, respecting newlines
+    let built = '';
+    let plainIdx = 0;
+    for (const line of lines) {
+      for (const ch of line) {
+        if (plainIdx <= i) built += ch;
+        plainIdx++;
+      }
+      if (plainIdx <= i + 1) built += '<br>';
+    }
+    el.innerHTML = built;
+    i++;
+    state.typingTimer = setTimeout(tick, 38);
+  }
+  tick();
+}
+
+function skipTypewriter(fullText) {
+  clearTimeout(state.typingTimer);
+  const lines = fullText.split('\n');
+  el.dialogText.innerHTML = lines.join('<br>');
+  state.typing = false;
+}
+
+// ── Load scene ──
+function loadScene(sceneId) {
+  if (sceneId === 'THE_END') { showEnd(); return; }
+
+  const scene = SCENES[sceneId];
+  if (!scene) { console.warn('Missing scene:', sceneId); return; }
+
+  state.sceneId = sceneId;
+
+  // Background
+  setBg(scene.bg);
+
+  // Label
+  el.sceneLabel.textContent = scene.label || '';
+
+  // Character
+  setCharacter(scene.char);
+
+  // Character name
+  const char = CHARS[scene.char];
+  el.charName.textContent = char ? char.name : '';
+  el.charName.style.color = char ? char.color : '#ccc';
+
+  // Hide choices, show dialog
+  el.choices.style.display  = 'none';
+  el.dialogBox.style.display = 'block';
+  el.hint.style.display = 'none';
+
+  // Typewriter
+  typewrite(scene.text, el.dialogText, () => {
+    if (scene.choices) {
+      showChoices(scene.choices);
+    } else {
+      el.hint.style.display = 'block';
+    }
+  });
+}
+
+function showChoices(choices) {
+  el.choiceList.innerHTML = '';
+  choices.forEach((c, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-prefix">${['①','②','③','④'][idx]}</span>${c.text}`;
+    btn.addEventListener('click', () => {
+      el.choices.style.display = 'none';
+      loadScene(c.next);
+    });
+    el.choiceList.appendChild(btn);
+  });
+  el.choices.style.display = 'block';
+  el.hint.style.display = 'none';
+}
+
+function showEnd() {
+  el.choices.style.display = 'none';
+  el.hint.style.display = 'none';
+  el.charName.textContent = '';
+  el.dialogText.innerHTML = '';
+  setBg(BG.end_screen);
+  setCharacter('narrator');
+
+  el.charWrap.style.opacity = '0';
+  el.sceneLabel.textContent = '';
+
+  setTimeout(() => {
+    el.dialogText.innerHTML = '序章终。<br><br><span style="color:rgba(255,255,255,0.35);font-size:0.85em;letter-spacing:0.15em">— 后续剧情正在书写中 —</span>';
+    el.hint.style.display = 'none';
+  }, 400);
+}
+
+// ── Click handler ──
+el.dialogBox.addEventListener('click', () => {
+  const scene = SCENES[state.sceneId];
+  if (!scene) return;
+
+  if (state.typing) {
+    skipTypewriter(scene.text);
+    state.typing = false;
+    if (scene.choices) {
+      showChoices(scene.choices);
+    } else {
+      el.hint.style.display = 'block';
+    }
+    return;
+  }
+
+  if (!scene.choices && !state.typing) {
+    if (scene.next) loadScene(scene.next);
+  }
+});
+
+// ── Card gallery ──
+function buildCardGrid() {
+  el.cardGrid.innerHTML = '';
+  CARDS.forEach(card => {
+    const item = document.createElement('div');
+    item.className = 'card-item' + (card.locked ? ' card-locked' : '');
+    item.style.background = card.locked
+      ? 'rgba(255,255,255,0.02)'
+      : `${card.bg}, rgba(0,0,0,0.4)`;
+    item.style.backgroundBlendMode = 'overlay';
+
+    item.innerHTML = `
+      <div class="card-badge" style="color:${card.color}">${card.initial}</div>
+      <div class="card-name">${card.name}</div>
+      <div class="card-attr">${card.attr}</div>
+    `;
+    item.style.setProperty('--card-color', card.color);
+    el.cardGrid.appendChild(item);
+  });
+}
+
+el.cardBtn.addEventListener('click', () => {
+  buildCardGrid();
+  el.cardOverlay.classList.add('open');
+});
+$('gallery-close').addEventListener('click', () => {
+  el.cardOverlay.classList.remove('open');
+});
+
+// ── Title screen ──
+$('start-btn').addEventListener('click', () => {
+  el.title.classList.add('hidden');
+  setTimeout(() => { el.title.style.display = 'none'; }, 1000);
+  loadScene('prologue_01');
+});
+
+// ── Init ──
+initParticles();
+setBg(BG.night_gate);
+</script>
+</body>
+</html>
