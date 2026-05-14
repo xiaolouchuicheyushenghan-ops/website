@@ -502,8 +502,9 @@ const BG = {
 };
 
 const CARDS = [
-  { id: 'hua',   name: '华·洛佩兹',     attr: '火属性 · 法师', initial: '华', color: '#e8704a', bg: BG.fire_glow,   locked: false },
-  { id: 'leian', name: '莱安·斯图尔特', attr: '木属性 · 法师', initial: '莱', color: '#52b788', bg: BG.forest_deep, locked: true  },
+  { id: 'hua',    name: '华·洛佩兹',     attr: '火属性 · 法师',     initial: '华', color: '#e8704a', bg: BG.fire_glow,    locked: false },
+  { id: 'leian',  name: '莱安·斯图尔特', attr: '木属性 · 法师',     initial: '莱', color: '#52b788', bg: BG.forest_deep,  locked: true  },
+  { id: 'angela', name: 'Angela',         attr: 'DLC · 天使 · 序',   initial: '✦', color: '#b8cce0', bg: BG.academy_dawn, locked: false, dlc: 'angela.html' },
 ];
 
 const SCENES = {
@@ -984,8 +985,13 @@ function buildCardGrid() {
       <div class="card-badge" style="color:${card.color}">${card.initial}</div>
       <div class="card-name">${card.name}</div>
       <div class="card-attr">${card.attr}</div>
+      ${card.dlc ? '<div class="card-attr" style="color:rgba(255,255,255,0.3);margin-top:4px">点击进入 ▶</div>' : ''}
     `;
     item.style.setProperty('--card-color', card.color);
+    if (card.dlc && !card.locked) {
+      item.addEventListener('click', () => { window.location.href = card.dlc; });
+      item.style.cursor = 'pointer';
+    }
     el.cardGrid.appendChild(item);
   });
 }
