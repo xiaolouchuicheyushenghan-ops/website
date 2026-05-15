@@ -457,6 +457,13 @@ const SCENES = {
     bg: BG.void, label: '黑暗', showCross: false, goldParticles: false,
     char: 'i',
     text: '我　缓然起身。',
+    next: 'dark_atmos',
+  },
+
+  dark_atmos: {
+    bg: BG.void, label: '黑暗', showCross: false, goldParticles: false,
+    char: 'narrator',
+    text: '不是从睡眠里醒来的那种黑暗。\n\n没有边界，没有地面，没有任何可以参照的东西——只有身体本身的重量，和掌心里铁钉传来的冷意。\n\n就这样悬在这里，已经不知道多久了。',
     next: 'dark_03',
   },
 
@@ -479,6 +486,13 @@ const SCENES = {
     bg: BG.chaos_dark, label: '十字架', showCross: true, goldParticles: false,
     char: 'inner',
     text: '被高高地钉在十字架之上的我——\n\n到底要用怎样的神情来观望这世间呢。',
+    next: 'cross_view',
+  },
+
+  cross_view: {
+    bg: BG.chaos_dark, label: '十字架', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '尘世在很遥远的下方，模糊成一片。\n\n那些声音——颂扬的，哭泣的，争论的——从遥远的地方飘来，叠在一起，变成一种无法分辨的嘈杂。\n\n他们在说什么，其实已经不重要了。',
     next: 'she_01',
   },
 
@@ -494,6 +508,13 @@ const SCENES = {
     bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
     char: 'narrator',
     text: '此刻的她，巧笑嫣然——\n\n星眸中光华尽现。',
+    next: 'she_gaze',
+  },
+
+  she_gaze: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'narrator',
+    text: '很久没有人看他了。\n\n不是那种仰视，不是那种膜拜——是真正地看着，带着某种近乎漫不经心的好奇，好像他只是这混沌中一件还算有趣的陈设。',
     next: 'she_speaks',
   },
 
@@ -546,6 +567,13 @@ const SCENES = {
     bg: BG.gold_warmth, label: '混沌', showCross: true, goldParticles: true,
     char: 'narrator',
     text: '只可惜——\n\n她粲然不息的眸中，再难容下他物。',
+    next: 'she_gone',
+  },
+
+  she_gone: {
+    bg: BG.gold_warmth, label: '混沌', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '混沌重新归于安静。\n\n她的笑意还留在空气里，像是不肯散去。\n\n铁钉的冷意倒是一直都在，从未离开过。',
     next: 'flashback_01',
   },
 
@@ -575,6 +603,13 @@ const SCENES = {
     bg: BG.past_glory, label: '往昔', showCross: true, goldParticles: false,
     char: 'narrator',
     text: '却总是自以为剽窃了天光，而沾沾自喜，阔步昂首，喧嚣着。',
+    next: 'quiet_fatigue',
+  },
+
+  quiet_fatigue: {
+    bg: BG.past_glory, label: '往昔', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '那些喧嚣声，其实他已经听不太真切了。\n\n不是不在意——是在意到了某种程度之后，一切都会变成这样：\n\n变成一种奇异的、平静的疲惫。',
     next: 'end_01',
   },
 

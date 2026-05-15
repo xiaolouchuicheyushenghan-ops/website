@@ -456,6 +456,13 @@ const SCENES = {
     bg: BG.white_awaken, label: '初醒', snowAlpha: 0.4,
     char: 'narrator',
     text: '梳理了一下身後的柔軟的雙翼，莫名而來的寒冷使我不由得縮了縮身子。\n\n一雙水藍色的眸子凝視著銀裝素裹下的世界，茫然與陌生。',
+    next: 'awaken_atmos',
+  },
+
+  awaken_atmos: {
+    bg: BG.white_awaken, label: '初醒', snowAlpha: 0.2,
+    char: 'narrator',
+    text: '那光是沒有來源的。\n\n四野盡白，不知是雲，是雪，還是這個世界本身的顏色。安靜得像是連時間都尚未誕生。',
     next: 'awaken_03',
   },
 
@@ -522,6 +529,13 @@ const SCENES = {
     bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
     char: 'narrator',
     text: '歌聲沒有停。它只是　繼續飄盪在這個銀白色的世界裡。\n\n像是從很遠很遠的地方傳來的。',
+    next: 'awaken_still',
+  },
+
+  awaken_still: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.6,
+    char: 'narrator',
+    text: '就這樣站著。\n\n身後的翅膀輕輕收攏了一下，白羽與周遭的白融在一起，幾乎分不清界限。\n\n大概在那裡站了很久。或者只是片刻。在這裡，這件事不那麼重要。',
     next: 'wings_01',
   },
 
@@ -593,10 +607,17 @@ const SCENES = {
     bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
     char: 'inner',
     text: '（只是究竟是誰——已經記不清楚了。）',
-    next: 'wander_01',
+    next: 'wander_depart',
   },
 
   // ─── 行 ───
+  wander_depart: {
+    bg: BG.snow_night, label: '行路', snowAlpha: 0.9,
+    char: 'narrator',
+    text: '後來，她踮起了腳尖。\n\n飄離地面的一刹那，有什麼東西在她心裡輕輕轉動了一下——\n\n說不清是什麼，只是覺得，應該往前走了。',
+    next: 'wander_01',
+  },
+
   wander_01: {
     bg: BG.dawn, label: '行路', snowAlpha: 1.0,
     char: 'inner',
@@ -607,7 +628,56 @@ const SCENES = {
   wander_02: {
     bg: BG.dawn, label: '行路', snowAlpha: 1.0,
     char: 'narrator',
-    text: '我路過了覆滿積雪的山峰，與靜止的溪流。\n\n沒有人知道我是誰。\n\n我只能不斷行走下去。',
+    text: '積雪沒有聲音。\n\n那是她後來才發現的事——靴子踩下去，雪面紋絲不動，沒有足跡。或者說，有，只是她轉身去看的時候，那一串印記已經不在了。',
+    next: 'wander_02b',
+  },
+
+  wander_02b: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '我路過了覆滿積雪的山峰。',
+    next: 'wander_02c',
+  },
+
+  wander_02c: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '那些山峰不說話。巨大的，沉默的，被雪蓋著，像是從亙古以前就在那裡，也將在那裡待到亙古以後。\n\nAngela飛過它們上空的時候，往下看了一眼——沒有路，沒有村莊，沒有任何人曾經經過的痕跡。',
+    next: 'wander_02d',
+  },
+
+  wander_02d: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '與靜止的溪流。',
+    next: 'wander_02e',
+  },
+
+  wander_02e: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '那條溪流讓她停了下來。\n\n水在某個瞬間凝固了，連浪花翻起的弧度都還保留著，透明的，精確的，只是再不流動。\n\n她不知道這意味著什麼。只是蹲下來，隔著一段距離，看了它很久。',
+    next: 'wander_02f',
+  },
+
+  wander_02f: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '沒有人知道我是誰。',
+    next: 'wander_02g',
+  },
+
+  wander_02g: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '她也不知道走了多久。\n\n那條路沒有起點，也沒有終點，只有眼前一片又一片的白，和身後——什麼都沒有。\n\n偶爾，她會轉過頭去看那雙靴子。白色的，輕飄飄的，像是借來的重量。',
+    next: 'wander_02h',
+  },
+
+  wander_02h: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '我只能不斷行走下去。',
     next: 'wander_03',
   },
 
@@ -615,6 +685,13 @@ const SCENES = {
     bg: BG.dawn, label: '行路', snowAlpha: 1.0,
     char: 'inner',
     text: '說起來——到底我也不知道，為什麼我要不斷地尋找。\n\n只是好像我本應如此。',
+    next: 'wander_preday',
+  },
+
+  wander_preday: {
+    bg: BG.dawn, label: '行路', snowAlpha: 0.8,
+    char: 'narrator',
+    text: '不知道走了多少個日夜之後。\n\n那天的空氣有些不同。\n\n不是更冷了，是那種冷換了一種方式——不再只是往外擠，而是往裡鑽，穿過羽翼，穿過衣衫，直抵某個她從未命名過的地方。',
     next: 'winter_day_01',
   },
 
@@ -637,6 +714,13 @@ const SCENES = {
     bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
     char: 'angela',
     text: '我看清了天空的顏色。',
+    next: 'sky_atmos',
+  },
+
+  sky_atmos: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.5,
+    char: 'narrator',
+    text: '是那種黎明剛過、白晝未至時才有的顏色。\n\n淡得幾乎沒有顏色，卻又分明是藍的。\n\n她不知道自己是不是曾經見過這個顏色。只是突然覺得，這個世界是真實的。',
     next: 'old_voice_01',
   },
 
@@ -718,6 +802,13 @@ const SCENES = {
     bg: BG.golden_hour, label: '誓言', snowAlpha: 0,
     char: 'angela',
     text: '縱使一切早已不復存在，但這份虔誠的信念，將永隨著我，和我所存在于的世界。\n\n他終將永恆。',
+    next: 'vow_silence',
+  },
+
+  vow_silence: {
+    bg: BG.golden_hour, label: '誓言', snowAlpha: 0,
+    char: 'narrator',
+    text: '說完的一瞬，四周更靜了。\n\n那份靜不是空洞的，是有重量的——像是某個她說不清楚的存在，正在聆聽。\n\nAngela將視線收回來，放在自己的手上。',
     next: 'break_01',
   },
 
