@@ -959,17 +959,25 @@ function initAudio() {
 
 function playClick() {
   if (!audioCtx || musicMuted) return;
-  const osc = audioCtx.createOscillator();
-  const g   = audioCtx.createGain();
-  osc.type = 'square';
-  osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.04);
-  g.gain.setValueAtTime(0.022, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.04);
-  osc.connect(g);
+  // 机械打字机：短噪声脉冲 + 带通滤波，复古质感
+  const bufLen = Math.floor(audioCtx.sampleRate * 0.022);
+  const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) {
+    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 2.5);
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  const bpf = audioCtx.createBiquadFilter();
+  bpf.type = 'bandpass';
+  bpf.frequency.value = 720;
+  bpf.Q.value = 0.7;
+  const g = audioCtx.createGain();
+  g.gain.value = 0.055;
+  src.connect(bpf);
+  bpf.connect(g);
   g.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.05);
+  src.start();
 }
 
 function toggleMusic() {
@@ -1216,7 +1224,7 @@ function buildCardGrid() {
     `;
     item.style.setProperty('--card-color', card.color);
     if (card.dlc && !card.locked) {
-      item.addEventListener('click', () => { window.location.href = card.dlc; });
+      item.addEventListener('click', () => openDLC(card.dlc));
       item.style.cursor = 'pointer';
     }
     el.cardGrid.appendChild(item);
@@ -1238,6 +1246,20 @@ $('start-btn').addEventListener('click', () => {
   setTimeout(() => { el.title.style.display = 'none'; }, 1000);
   loadScene('prologue_01');
 });
+
+// ── DLC navigation (works on htmlpreview + local) ──
+function openDLC(dlcFile) {
+  const href = window.location.href;
+  if (href.includes('htmlpreview.github.io')) {
+    const rawUrl = decodeURIComponent(href.split('?')[1] || '');
+    if (rawUrl) {
+      const dlcRaw = rawUrl.replace(/\/[^/]+\.html(\?.*)?$/, '/' + dlcFile);
+      window.location.href = 'https://htmlpreview.github.io/?' + encodeURIComponent(dlcRaw);
+      return;
+    }
+  }
+  window.location.href = dlcFile;
+}
 
 // ── Music toggle ──
 el.musicBtn.addEventListener('click', () => {
