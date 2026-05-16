@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>殊荣 · 混沌中</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-i:       #c0a090;
+      --color-she:     #e8c870;
+      --color-inner:   #a89898;
+      --color-narr:    #888898;
+      --dialog-bg: rgba(2, 1, 6, 0.87);
+      --font: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', '宋体', serif;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #020108;
+      font-family: var(--font);
+    }
+
+    #game {
+      position: relative;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ═══ BACKGROUNDS ═══ */
+    .bg-layer {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: opacity 1.4s ease;
+    }
+    #bg-a { z-index: 1; }
+    #bg-b { z-index: 2; opacity: 0; }
+
+    #vignette {
+      position: absolute; inset: 0; z-index: 3;
+      background: radial-gradient(ellipse at 50% 30%, transparent 20%, rgba(0,0,0,0.75) 100%);
+      pointer-events: none;
+    }
+
+    /* ═══ CROSS SILHOUETTE (background deco) ═══ */
+    #cross-bg {
+      position: absolute;
+      z-index: 4;
+      pointer-events: none;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 55vh;
+      transition: opacity 1s ease;
+    }
+    #cross-bg::before {
+      content: '';
+      position: absolute;
+      top: 22%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 26vw;
+      max-width: 220px;
+      height: 3px;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent);
+    }
+    #cross-bg::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.04) 80%, transparent);
+    }
+
+    /* ═══ GOLD PARTICLES (appear when she speaks) ═══ */
+    #gold-particles {
+      position: absolute; inset: 0; z-index: 5;
+      pointer-events: none; overflow: hidden;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+    .g-spark {
+      position: absolute;
+      border-radius: 50%;
+      background: #e8c870;
+      animation: twinkle ease-in-out infinite;
+      box-shadow: 0 0 4px #e8c870;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: 0; transform: scale(0.5) translateY(0); }
+      50%      { opacity: 0.85; transform: scale(1.2) translateY(-8px); }
+    }
+
+    /* ═══ SCENE LABEL ═══ */
+    #scene-label {
+      position: absolute;
+      top: clamp(14px,2.5vh,22px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.6rem;
+      letter-spacing: 0.32em;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ═══ CHARACTER BADGE ═══ */
+    #character-wrap {
+      position: absolute;
+      bottom: calc(30% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      pointer-events: none;
+      transition: opacity 0.7s ease;
+    }
+    #char-badge {
+      width: clamp(60px,10.5vw,92px);
+      height: clamp(60px,10.5vw,92px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.1rem,2.3vw,1.75rem);
+      border: 1.5px solid currentColor;
+      opacity: 0.72;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      transition: color 0.7s, box-shadow 0.7s;
+    }
+
+    /* ═══ DIALOG BOX ═══ */
+    #dialog-area {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 20;
+      padding: 0 clamp(16px,5vw,80px) clamp(18px,3.5vh,36px);
+    }
+    #dialog-box {
+      background: var(--dialog-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: clamp(15px,2.5vh,25px) clamp(18px,3vw,34px);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      min-height: clamp(108px,20vh,150px);
+    }
+    /* bottom accent rule */
+    #dialog-box::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 25%; right: 25%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(180,140,80,0.18), transparent);
+    }
+    #char-name-box {
+      font-size: clamp(0.72rem,1.3vw,0.9rem);
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      margin-bottom: 10px;
+      transition: color 0.5s;
+    }
+    #dialog-text {
+      font-size: clamp(0.88rem,1.6vw,1.06rem);
+      line-height: 2.1;
+      color: #ccc4b8;
+      min-height: 3.4em;
+      word-break: break-all;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+    #continue-hint {
+      position: absolute;
+      bottom: 13px; right: 18px;
+      color: rgba(255,255,255,0.25);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      display: none;
+      animation: blink 1.8s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 0.25; }
+      50%      { opacity: 0.7; }
+    }
+
+    /* ═══ CHOICES ═══ */
+    #choices-panel {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 30;
+      padding: 0 clamp(16px,5vw,80px) clamp(18px,3.5vh,36px);
+      display: none;
+    }
+    .choices-wrap {
+      background: rgba(2,1,8,0.90);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+    }
+    .choice-hint-text {
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.2);
+      text-align: center;
+      letter-spacing: 0.3em;
+      padding: 6px 0 3px;
+    }
+    .choice-btn {
+      display: block; width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 7px;
+      color: #b8b0a8;
+      font-family: var(--font);
+      font-size: clamp(0.85rem,1.5vw,1rem);
+      font-weight: 300;
+      padding: clamp(10px,1.6vh,15px) clamp(12px,2.3vw,20px);
+      margin-top: 5px;
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.6;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    .choice-btn:hover, .choice-btn:focus {
+      background: rgba(232,200,112,0.05);
+      border-color: rgba(232,200,112,0.2);
+      color: #e0d4b0;
+      outline: none;
+    }
+
+    /* ═══ TITLE SCREEN ═══ */
+    #title-screen {
+      position: absolute; inset: 0; z-index: 100;
+      background: #020108;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1.2s ease;
+    }
+    #title-screen.hidden { opacity: 0; pointer-events: none; }
+
+    /* Large faint cross behind title */
+    .title-bg-cross {
+      position: absolute;
+      width: 3px;
+      height: 55vh;
+      background: rgba(255,255,255,0.035);
+      left: 50%; transform: translateX(-50%);
+    }
+    .title-bg-cross::before {
+      content: '';
+      position: absolute;
+      top: 22%;
+      left: 50%; transform: translateX(-50%);
+      width: 32vw; max-width: 260px;
+      height: 2px;
+      background: rgba(255,255,255,0.035);
+    }
+
+    .title-eyebrow {
+      color: rgba(255,255,255,0.12);
+      font-size: clamp(0.55rem,1vw,0.72rem);
+      letter-spacing: 0.55em;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .title-zh {
+      font-size: clamp(2.8rem,6.5vw,5rem);
+      font-weight: 600;
+      color: rgba(255,255,255,0.82);
+      letter-spacing: 0.35em;
+      text-shadow: 0 0 60px rgba(180,130,60,0.15);
+      position: relative; z-index: 1;
+      margin-bottom: 5px;
+    }
+    .title-sub {
+      font-size: clamp(0.68rem,1.15vw,0.85rem);
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 0.45em;
+      margin-bottom: 55px;
+      position: relative; z-index: 1;
+      font-weight: 300;
+    }
+    .title-rule {
+      width: 1px; height: 38px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.18), transparent);
+      margin-bottom: 30px;
+      position: relative; z-index: 1;
+    }
+    #start-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.16);
+      color: rgba(255,255,255,0.52);
+      font-family: var(--font);
+      font-size: clamp(0.78rem,1.25vw,0.9rem);
+      letter-spacing: 0.45em;
+      padding: 12px 46px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-weight: 300;
+      transition: all 0.35s;
+      position: relative; z-index: 1;
+    }
+    #start-btn:hover {
+      border-color: rgba(232,200,112,0.3);
+      color: rgba(232,200,112,0.75);
+    }
+    #back-to-main {
+      margin-top: 14px;
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.18);
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      background: none; border: none;
+      font-family: var(--font);
+      transition: color 0.2s;
+      text-decoration: none;
+      position: relative; z-index: 1;
+    }
+    #back-to-main:hover { color: rgba(255,255,255,0.5); }
+
+    /* ═══ IN-GAME NAV ═══ */
+    #btn-back {
+      position: absolute;
+      top: clamp(12px,2vh,20px);
+      left: clamp(14px,2.5vw,26px);
+      z-index: 50;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.25);
+      font-family: var(--font);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      padding: 6px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    #btn-back:hover { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.25); }
+
+    @media (max-width: 600px) {
+      #character-wrap { bottom: calc(27% + 6px); }
+    }
+    @media (max-height: 540px) {
+      #character-wrap { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div id="game">
+
+  <div id="bg-a" class="bg-layer"></div>
+  <div id="bg-b" class="bg-layer"></div>
+  <div id="vignette"></div>
+
+  <!-- Cross silhouette -->
+  <div id="cross-bg"></div>
+
+  <!-- Gold particles -->
+  <div id="gold-particles"></div>
+
+  <!-- Scene label -->
+  <div id="scene-label"></div>
+
+  <!-- Back button -->
+  <a href="game.html" id="btn-back">← 返回</a>
+
+  <!-- Character badge -->
+  <div id="character-wrap">
+    <div id="char-badge"></div>
+  </div>
+
+  <!-- Dialog -->
+  <div id="dialog-area">
+    <div id="dialog-box">
+      <div id="char-name-box"></div>
+      <div id="dialog-text"></div>
+      <div id="continue-hint">继续 ▶</div>
+    </div>
+  </div>
+
+  <!-- Choices -->
+  <div id="choices-panel">
+    <div class="choices-wrap">
+      <div class="choice-hint-text">— 选 择 —</div>
+      <div id="choices-list"></div>
+    </div>
+  </div>
+
+  <!-- Title screen -->
+  <div id="title-screen">
+    <div class="title-bg-cross"></div>
+    <div class="title-eyebrow">D A R K N E S S · C H A O S · G L O R Y</div>
+    <div class="title-zh">殊　荣</div>
+    <div class="title-sub">混 沌 中</div>
+    <div class="title-rule"></div>
+    <button id="start-btn">凝 视 深 渊</button>
+    <a href="game.html" id="back-to-main">← 返回主线</a>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  CHARACTERS
+// ════════════════════════════════════════════
+const CHARS = {
+  narrator: { name: '',         color: '#888898', initial: '·',  glow: 'rgba(136,136,152,0.3)' },
+  i:        { name: '我',       color: '#c8b0a0', initial: '吾', glow: 'rgba(180,150,130,0.35)' },
+  inner:    { name: '〔内心〕', color: '#a8a0a0', initial: '心', glow: 'rgba(168,160,160,0.3)'  },
+  she:      { name: '她',       color: '#e8c870', initial: '星', glow: 'rgba(232,200,112,0.45)' },
+};
+
+// ════════════════════════════════════════════
+//  BACKGROUNDS
+// ════════════════════════════════════════════
+const BG = {
+  void:         'linear-gradient(180deg, #020108 0%, #050210 100%)',
+  chaos_dark:   'linear-gradient(180deg, #03020c 0%, #080414 50%, #060210 100%)',
+  she_appears:  'linear-gradient(160deg, #040210 0%, #0a060c 40%, #06020e 100%)',
+  gold_warmth:  'linear-gradient(180deg, #060308 0%, #0c0608 40%, #100a04 100%)',
+  past_glory:   'linear-gradient(180deg, #080406 0%, #10060a 50%, #0c0408 100%)',
+  end_void:     'linear-gradient(180deg, #020106 0%, #04020a 100%)',
+};
+
+// ════════════════════════════════════════════
+//  SCENES
+// ════════════════════════════════════════════
+const SCENES = {
+
+  // ─── 黑暗 ───
+  dark_01: {
+    bg: BG.void, label: '黑暗', showCross: false, goldParticles: false,
+    char: 'narrator',
+    text: '黑暗之中。',
+    next: 'dark_02',
+  },
+
+  dark_02: {
+    bg: BG.void, label: '黑暗', showCross: false, goldParticles: false,
+    char: 'i',
+    text: '我　缓然起身。',
+    next: 'dark_atmos',
+  },
+
+  dark_atmos: {
+    bg: BG.void, label: '黑暗', showCross: false, goldParticles: false,
+    char: 'narrator',
+    text: '不是从睡眠里醒来的那种黑暗。\n\n没有边界，没有地面，没有任何可以参照的东西——只有身体本身的重量，和掌心里铁钉传来的冷意。\n\n就这样悬在这里，已经不知道多久了。',
+    next: 'dark_03',
+  },
+
+  dark_03: {
+    bg: BG.void, label: '黑暗', showCross: false, goldParticles: false,
+    char: 'inner',
+    text: '说起身陷囹囵——\n\n也不过是这样了罢？',
+    next: 'cross_01',
+  },
+
+  // ─── 十字架 ───
+  cross_01: {
+    bg: BG.chaos_dark, label: '十字架', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '是了。',
+    next: 'cross_02',
+  },
+
+  cross_02: {
+    bg: BG.chaos_dark, label: '十字架', showCross: true, goldParticles: false,
+    char: 'inner',
+    text: '被高高地钉在十字架之上的我——\n\n到底要用怎样的神情来观望这世间呢。',
+    next: 'cross_view',
+  },
+
+  cross_view: {
+    bg: BG.chaos_dark, label: '十字架', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '尘世在很遥远的下方，模糊成一片。\n\n那些声音——颂扬的，哭泣的，争论的——从遥远的地方飘来，叠在一起，变成一种无法分辨的嘈杂。\n\n他们在说什么，其实已经不重要了。',
+    next: 'she_01',
+  },
+
+  // ─── 她出现 ───
+  she_01: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'narrator',
+    text: '她孤立于混沌中。',
+    next: 'she_02',
+  },
+
+  she_02: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'narrator',
+    text: '此刻的她，巧笑嫣然——\n\n星眸中光华尽现。',
+    next: 'she_gaze',
+  },
+
+  she_gaze: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'narrator',
+    text: '很久没有人看他了。\n\n不是那种仰视，不是那种膜拜——是真正地看着，带着某种近乎漫不经心的好奇，好像他只是这混沌中一件还算有趣的陈设。',
+    next: 'she_speaks',
+  },
+
+  she_speaks: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'she',
+    text: '「被传颂千古的您，也会有这样的一天呀？」',
+    next: 'i_inner_01',
+  },
+
+  i_inner_01: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'inner',
+    text: '被这样打趣，倒也不足为人道——\n\n只是提起传颂千古……',
+    next: 'i_choice',
+  },
+
+  i_choice: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'inner',
+    text: '（那个词，落在耳边，格外刺耳。）',
+    choices: [
+      { text: '回以笑意，不置可否。',         next: 'reply_smile'  },
+      { text: '沉默片刻，再开口。',            next: 'reply_pause'  },
+    ],
+  },
+
+  reply_smile: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'narrator',
+    text: '我抬头，对她回以笑意。',
+    next: 'i_reply',
+  },
+
+  reply_pause: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'narrator',
+    text: '沉默。\n\n铁钉嵌进手掌的痛楚，倒是比那个词更清晰一些。',
+    next: 'i_reply',
+  },
+
+  i_reply: {
+    bg: BG.she_appears, label: '混沌', showCross: true, goldParticles: true,
+    char: 'i',
+    text: '「所谓传颂千古的——\n\n从——来——都不会是我呀。」',
+    next: 'she_eyes',
+  },
+
+  she_eyes: {
+    bg: BG.gold_warmth, label: '混沌', showCross: true, goldParticles: true,
+    char: 'narrator',
+    text: '只可惜——\n\n她粲然不息的眸中，再难容下他物。',
+    next: 'she_gone',
+  },
+
+  she_gone: {
+    bg: BG.gold_warmth, label: '混沌', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '混沌重新归于安静。\n\n她的笑意还留在空气里，像是不肯散去。\n\n铁钉的冷意倒是一直都在，从未离开过。',
+    next: 'flashback_01',
+  },
+
+  // ─── 往昔 ───
+  flashback_01: {
+    bg: BG.past_glory, label: '往昔', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '曾经万人称颂的那天——',
+    next: 'flashback_02',
+  },
+
+  flashback_02: {
+    bg: BG.past_glory, label: '往昔', showCross: true, goldParticles: false,
+    char: 'i',
+    text: '我在十字架上，接受着尘埃落定的结局。',
+    next: 'reflection_01',
+  },
+
+  reflection_01: {
+    bg: BG.past_glory, label: '往昔', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '世人愚昧。\n\n真相从来不会是他们所想——',
+    next: 'reflection_02',
+  },
+
+  reflection_02: {
+    bg: BG.past_glory, label: '往昔', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '却总是自以为剽窃了天光，而沾沾自喜，阔步昂首，喧嚣着。',
+    next: 'quiet_fatigue',
+  },
+
+  quiet_fatigue: {
+    bg: BG.past_glory, label: '往昔', showCross: true, goldParticles: false,
+    char: 'narrator',
+    text: '那些喧嚣声，其实他已经听不太真切了。\n\n不是不在意——是在意到了某种程度之后，一切都会变成这样：\n\n变成一种奇异的、平静的疲惫。',
+    next: 'end_01',
+  },
+
+  // ─── 殊荣 ───
+  end_01: {
+    bg: BG.end_void, label: '殊荣', showCross: false, goldParticles: false,
+    char: 'inner',
+    text: '我的逝去——\n\n竟然成了至高无上的殊荣。',
+    next: 'end_02',
+  },
+
+  end_02: {
+    bg: BG.end_void, label: '殊荣', showCross: false, goldParticles: false,
+    char: 'narrator',
+    text: '黑暗之中，铁钉的冰凉还留在掌心。\n\n远处，她的眸光正在消散，\n\n如流星划过无人知晓的角落。',
+    next: 'THE_END',
+  },
+};
+
+// ════════════════════════════════════════════
+//  ENGINE
+// ════════════════════════════════════════════
+let state = {
+  sceneId: 'dark_01',
+  typing: false,
+  typingTimer: null,
+  bgActive: 'a',
+  currentBg: null,
+  crossVisible: false,
+  goldVisible: false,
+};
+
+const $  = id => document.getElementById(id);
+const el = {
+  bgA:          $('bg-a'),
+  bgB:          $('bg-b'),
+  crossBg:      $('cross-bg'),
+  goldParticles:$('gold-particles'),
+  sceneLabel:   $('scene-label'),
+  charWrap:     $('character-wrap'),
+  charBadge:    $('char-badge'),
+  dialogBox:    $('dialog-box'),
+  charName:     $('char-name-box'),
+  dialogText:   $('dialog-text'),
+  hint:         $('continue-hint'),
+  choices:      $('choices-panel'),
+  choiceList:   $('choices-list'),
+  title:        $('title-screen'),
+};
+
+// ── Background ──
+function setBg(bgDef) {
+  if (bgDef === state.currentBg) return;
+  state.currentBg = bgDef;
+  const incoming = state.bgActive === 'a' ? el.bgB : el.bgA;
+  const outgoing  = state.bgActive === 'a' ? el.bgA : el.bgB;
+  incoming.style.background = bgDef;
+  incoming.style.opacity = '1';
+  outgoing.style.opacity  = '0';
+  state.bgActive = state.bgActive === 'a' ? 'b' : 'a';
+}
+
+// ── Cross deco ──
+function setCross(visible) {
+  if (visible === state.crossVisible) return;
+  state.crossVisible = visible;
+  el.crossBg.style.opacity = visible ? '1' : '0';
+}
+
+// ── Gold particles ──
+let goldSparkEls = [];
+function initGoldParticles() {
+  el.goldParticles.innerHTML = '';
+  goldSparkEls = [];
+  for (let i = 0; i < 28; i++) {
+    const s = document.createElement('div');
+    s.className = 'g-spark';
+    const size = Math.random() * 2.5 + 1;
+    s.style.cssText = `
+      left: ${Math.random() * 100}%;
+      top: ${Math.random() * 100}%;
+      width: ${size}px;
+      height: ${size}px;
+      animation-duration: ${Math.random() * 3 + 2}s;
+      animation-delay: ${Math.random() * 4}s;
+    `;
+    el.goldParticles.appendChild(s);
+    goldSparkEls.push(s);
+  }
+}
+
+function setGold(visible) {
+  if (visible === state.goldVisible) return;
+  state.goldVisible = visible;
+  el.goldParticles.style.opacity = visible ? '1' : '0';
+}
+
+// ── Character ──
+function setCharacter(charKey) {
+  const char = CHARS[charKey];
+  if (!char || charKey === 'narrator') {
+    el.charWrap.style.opacity = '0';
+    return;
+  }
+  el.charWrap.style.opacity = '1';
+  el.charBadge.textContent  = char.initial;
+  el.charBadge.style.color  = char.color;
+  el.charBadge.style.boxShadow = `0 0 22px ${char.glow}, 0 0 5px rgba(0,0,0,0.7)`;
+}
+
+// ── Typewriter ──
+function typewrite(text, domEl, onDone) {
+  domEl.textContent = '';
+  state.typing = true;
+  el.hint.style.display = 'none';
+
+  const lines = text.split('\n');
+  const chars = [...text.replace(/\n/g, '\x00')];
+  let i = 0;
+
+  function tick() {
+    if (i >= chars.length) {
+      domEl.innerHTML = lines.join('<br>');
+      state.typing = false;
+      if (onDone) onDone();
+      return;
+    }
+    let built = '';
+    let ci = 0;
+    for (const line of lines) {
+      for (const ch of [...line]) {
+        if (ci <= i) built += ch;
+        ci++;
+      }
+      if (ci <= i + 1) built += '<br>';
+    }
+    domEl.innerHTML = built;
+    i++;
+    state.typingTimer = setTimeout(tick, 44);
+  }
+  tick();
+}
+
+function skipTypewriter(fullText) {
+  clearTimeout(state.typingTimer);
+  el.dialogText.innerHTML = fullText.split('\n').join('<br>');
+  state.typing = false;
+}
+
+// ── Load scene ──
+function loadScene(sceneId) {
+  if (sceneId === 'THE_END') { showEnd(); return; }
+  const scene = SCENES[sceneId];
+  if (!scene) { console.warn('Missing scene:', sceneId); return; }
+  state.sceneId = sceneId;
+
+  setBg(scene.bg);
+  setCross(scene.showCross);
+  setGold(scene.goldParticles);
+  el.sceneLabel.textContent = scene.label || '';
+
+  setCharacter(scene.char);
+  const char = CHARS[scene.char];
+  el.charName.textContent = char ? char.name : '';
+  el.charName.style.color = char ? char.color : '#aaa';
+
+  el.choices.style.display  = 'none';
+  el.dialogBox.style.display = 'block';
+  el.hint.style.display = 'none';
+
+  typewrite(scene.text, el.dialogText, () => {
+    if (scene.choices) showChoices(scene.choices);
+    else el.hint.style.display = 'block';
+  });
+}
+
+function showChoices(choices) {
+  el.choiceList.innerHTML = '';
+  choices.forEach((c, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    const sym = ['○', '●'][idx] || '·';
+    btn.innerHTML = `<span style="color:rgba(232,200,112,0.25);margin-right:8px;font-size:.75em">${sym}</span>${c.text}`;
+    btn.addEventListener('click', () => {
+      el.choices.style.display = 'none';
+      loadScene(c.next);
+    });
+    el.choiceList.appendChild(btn);
+  });
+  el.choices.style.display = 'block';
+}
+
+function showEnd() {
+  el.choices.style.display = 'none';
+  el.hint.style.display = 'none';
+  setBg(BG.end_void);
+  setCross(false);
+  setGold(false);
+  setCharacter('narrator');
+  el.charWrap.style.opacity = '0';
+
+  setTimeout(() => {
+    el.charName.textContent = '';
+    el.dialogText.innerHTML =
+      '…………<br><br>' +
+      '<span style="color:rgba(255,255,255,0.22);font-size:.8em;letter-spacing:.2em">— 黑暗恒常，而她已散 —</span>';
+  }, 500);
+}
+
+// ── Click handler ──
+el.dialogBox.addEventListener('click', () => {
+  const scene = SCENES[state.sceneId];
+  if (!scene) return;
+
+  if (state.typing) {
+    skipTypewriter(scene.text);
+    state.typing = false;
+    if (scene.choices) showChoices(scene.choices);
+    else el.hint.style.display = 'block';
+    return;
+  }
+
+  if (!scene.choices && !state.typing && scene.next) {
+    loadScene(scene.next);
+  }
+});
+
+// ── Title ──
+$('start-btn').addEventListener('click', () => {
+  el.title.classList.add('hidden');
+  setTimeout(() => { el.title.style.display = 'none'; }, 1200);
+  loadScene('dark_01');
+});
+
+// ── Init ──
+initGoldParticles();
+setBg(BG.void);
+el.crossBg.style.opacity = '0';
+el.goldParticles.style.opacity = '0';
+el.charWrap.style.opacity = '0';
+</script>
+</body>
+</html>

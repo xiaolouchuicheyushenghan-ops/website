@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Angela · 序</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-angela: #b8cce0;
+      --color-inner:  #d8cce8;
+      --color-voice:  #e8dfc8;
+      --color-narr:   #c0c8d0;
+      --dialog-bg: rgba(2, 4, 10, 0.80);
+      --font: 'Noto Serif SC', 'Source Han Serif TC', 'PMingLiU', '新細明體', serif;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #04060e;
+      font-family: var(--font);
+    }
+
+    #game {
+      position: relative;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ═══ BACKGROUNDS ═══ */
+    .bg-layer {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: opacity 1.1s ease;
+    }
+    #bg-a { z-index: 1; }
+    #bg-b { z-index: 2; opacity: 0; }
+
+    /* Wide gradient horizon — snow world */
+    #horizon {
+      position: absolute;
+      inset: 0; z-index: 3;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+
+    #vignette {
+      position: absolute; inset: 0; z-index: 4;
+      background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+    }
+
+    /* ═══ SNOW PARTICLES ═══ */
+    #snow {
+      position: absolute; inset: 0; z-index: 5;
+      pointer-events: none; overflow: hidden;
+    }
+    .flake {
+      position: absolute;
+      top: -10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.85);
+      animation: snowfall linear infinite;
+      opacity: 0;
+      box-shadow: 0 0 3px rgba(255,255,255,0.5);
+    }
+    @keyframes snowfall {
+      0%   { transform: translateY(-10px) translateX(0)         rotate(0deg);   opacity: 0;   }
+      5%   { opacity: 0.9; }
+      90%  { opacity: 0.5; }
+      100% { transform: translateY(110vh) translateX(var(--sx)) rotate(360deg); opacity: 0; }
+    }
+
+    /* ═══ CROSS DECO (top center) ═══ */
+    #cross-deco {
+      position: absolute;
+      top: clamp(14px, 2.5vh, 22px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      pointer-events: none;
+      opacity: 0.3;
+      transition: opacity 0.8s ease;
+    }
+    .cross-symbol {
+      color: rgba(255,255,255,0.6);
+      font-size: clamp(0.9rem, 1.6vw, 1.2rem);
+      letter-spacing: 0.1em;
+    }
+    #scene-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.3em;
+      margin-top: 4px;
+    }
+
+    /* ═══ FEATHER/WING DECO ═══ */
+    #wing-deco {
+      position: absolute;
+      z-index: 6;
+      pointer-events: none;
+      width: 100%;
+      bottom: 28%;
+      display: flex;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    #wing-deco.visible { opacity: 1; }
+
+    /* ═══ CHARACTER BADGE ═══ */
+    #character-wrap {
+      position: absolute;
+      bottom: calc(30% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    #char-badge {
+      width: clamp(64px, 11vw, 96px);
+      height: clamp(64px, 11vw, 96px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.2rem, 2.5vw, 1.9rem);
+      border: 1.5px solid currentColor;
+      opacity: 0.75;
+      transition: color 0.6s, box-shadow 0.6s;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(4px);
+      letter-spacing: 0;
+    }
+
+    /* ═══ DIALOG BOX ═══ */
+    #dialog-area {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 20;
+      padding: 0 clamp(16px,5vw,80px) clamp(18px,3.5vh,36px);
+    }
+    #dialog-box {
+      background: var(--dialog-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: clamp(14px,2.5vh,24px) clamp(18px,3vw,34px);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      min-height: clamp(108px,20vh,148px);
+    }
+    /* thin silver top accent line */
+    #dialog-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(200,220,240,0.3), transparent);
+    }
+    #char-name-box {
+      font-size: clamp(0.72rem,1.3vw,0.9rem);
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      margin-bottom: 9px;
+      padding-left: 2px;
+      transition: color 0.4s ease;
+    }
+    #dialog-text {
+      font-size: clamp(0.88rem,1.6vw,1.06rem);
+      line-height: 2;
+      color: #dcd8d0;
+      min-height: 3.2em;
+      word-break: break-all;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+    #continue-hint {
+      position: absolute;
+      bottom: 12px; right: 18px;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      display: none;
+      animation: blink 1.8s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 0.3; }
+      50%      { opacity: 0.8; }
+    }
+
+    /* ═══ CHOICES ═══ */
+    #choices-panel {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 30;
+      padding: 0 clamp(16px,5vw,80px) clamp(18px,3.5vh,36px);
+      display: none;
+    }
+    .choices-wrap {
+      background: rgba(2,4,12,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 8px 8px 10px;
+    }
+    .choice-hint-text {
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.22);
+      text-align: center;
+      letter-spacing: 0.3em;
+      padding: 6px 0 3px;
+    }
+    .choice-btn {
+      display: block; width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 7px;
+      color: #c8c4bc;
+      font-family: var(--font);
+      font-size: clamp(0.85rem,1.5vw,1rem);
+      font-weight: 300;
+      padding: clamp(10px,1.6vh,15px) clamp(12px,2.3vw,20px);
+      margin-top: 5px;
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.6;
+      letter-spacing: 0.05em;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .choice-btn:hover, .choice-btn:focus {
+      background: rgba(200,220,240,0.06);
+      border-color: rgba(200,220,240,0.25);
+      color: #e8e4dc;
+      outline: none;
+    }
+
+    /* ═══ TITLE SCREEN ═══ */
+    #title-screen {
+      position: absolute; inset: 0; z-index: 100;
+      background: linear-gradient(160deg, #f6f4f0 0%, #eaeaee 50%, #f0f0f6 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1.2s ease;
+    }
+    #title-screen.hidden { opacity: 0; pointer-events: none; }
+
+    .title-cross {
+      font-size: clamp(1.8rem,4vw,2.8rem);
+      color: rgba(0,0,0,0.15);
+      margin-bottom: 18px;
+      letter-spacing: 0.2em;
+    }
+    .title-name {
+      font-size: clamp(3rem,7vw,5.5rem);
+      font-weight: 600;
+      color: #1a1a24;
+      letter-spacing: 0.35em;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 30px rgba(100,140,180,0.2);
+    }
+    .title-sub {
+      font-size: clamp(0.72rem,1.2vw,0.9rem);
+      color: rgba(0,0,0,0.3);
+      letter-spacing: 0.45em;
+      margin-bottom: 52px;
+      font-weight: 300;
+    }
+    .title-rule {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.2), transparent);
+      margin-bottom: 32px;
+    }
+    #start-btn {
+      background: transparent;
+      border: 1px solid rgba(0,0,0,0.18);
+      color: rgba(0,0,0,0.55);
+      font-family: var(--font);
+      font-size: clamp(0.78rem,1.25vw,0.9rem);
+      letter-spacing: 0.45em;
+      padding: 12px 46px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 300;
+    }
+    #start-btn:hover {
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.35);
+      color: rgba(0,0,0,0.8);
+    }
+    #back-to-main {
+      margin-top: 14px;
+      font-size: 0.62rem;
+      color: rgba(0,0,0,0.25);
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      background: none; border: none;
+      font-family: var(--font);
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    #back-to-main:hover { color: rgba(0,0,0,0.55); }
+
+    /* ═══ IN-GAME BACK BUTTON ═══ */
+    #btn-back {
+      position: absolute;
+      top: clamp(12px,2vh,20px);
+      left: clamp(14px,2.5vw,26px);
+      z-index: 50;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.3);
+      font-family: var(--font);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      padding: 6px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    #btn-back:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); }
+
+    /* ═══ LOOP END ═══ */
+    #end-overlay {
+      position: absolute; inset: 0; z-index: 90;
+      background: rgba(255,255,255,0);
+      pointer-events: none;
+      transition: background 1.5s ease;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #end-overlay.flash {
+      background: rgba(255,255,255,0.85);
+    }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 600px) {
+      #character-wrap { bottom: calc(27% + 6px); }
+    }
+    @media (max-height: 540px) {
+      #character-wrap { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div id="game">
+
+  <div id="bg-a" class="bg-layer"></div>
+  <div id="bg-b" class="bg-layer"></div>
+  <div id="horizon"></div>
+  <div id="vignette"></div>
+
+  <!-- Snow -->
+  <div id="snow"></div>
+
+  <!-- Cross + scene label -->
+  <div id="cross-deco">
+    <div class="cross-symbol">✝</div>
+    <div id="scene-label"></div>
+  </div>
+
+  <!-- Back button (in-game) -->
+  <a href="game.html" id="btn-back">← 返回</a>
+
+  <!-- Character badge -->
+  <div id="character-wrap">
+    <div id="char-badge"></div>
+  </div>
+
+  <!-- Dialog -->
+  <div id="dialog-area">
+    <div id="dialog-box">
+      <div id="char-name-box"></div>
+      <div id="dialog-text"></div>
+      <div id="continue-hint">繼續 ▶</div>
+    </div>
+  </div>
+
+  <!-- Choices -->
+  <div id="choices-panel">
+    <div class="choices-wrap">
+      <div class="choice-hint-text">— 選 擇 —</div>
+      <div id="choices-list"></div>
+    </div>
+  </div>
+
+  <!-- White flash overlay -->
+  <div id="end-overlay"></div>
+
+  <!-- Title screen (light theme) -->
+  <div id="title-screen">
+    <div class="title-cross">✝</div>
+    <div class="title-name">Angela</div>
+    <div class="title-sub">D L C · 天 使 · 序</div>
+    <div class="title-rule"></div>
+    <button id="start-btn">聆 聽 故 事</button>
+    <a href="game.html" id="back-to-main">← 返回主線</a>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  CHARACTERS
+// ════════════════════════════════════════════
+const CHARS = {
+  narrator: { name: '',           color: '#b0bcc8', initial: '·',  glow: 'rgba(176,188,200,0.3)' },
+  angela:   { name: 'Angela',     color: '#b8cce0', initial: '✦',  glow: 'rgba(184,204,224,0.4)' },
+  inner:    { name: '〔内心〕',   color: '#d0c4e0', initial: '心',  glow: 'rgba(208,196,224,0.3)' },
+  voice:    { name: '〔聲音〕',   color: '#e0d8c0', initial: '°',   glow: 'rgba(224,216,192,0.35)' },
+};
+
+// ════════════════════════════════════════════
+//  BACKGROUNDS
+// ════════════════════════════════════════════
+const BG = {
+  white_awaken: 'linear-gradient(180deg, #f0f2f8 0%, #e8eaf4 100%)',
+  snow_night:   'linear-gradient(180deg, #050810 0%, #08101e 45%, #0c1626 100%)',
+  snow_dusk:    'linear-gradient(180deg, #0a0608 0%, #180e0a 40%, #261408 80%, #1a0e0a 100%)',
+  golden_hour:  'linear-gradient(180deg, #0f0800 0%, #200e00 35%, #301800 65%, #1e0c00 100%)',
+  dawn:         'linear-gradient(180deg, #080614 0%, #100c20 40%, #181428 100%)',
+  pure_white:   'linear-gradient(180deg, #f8f8fc 0%, #eeecf4 100%)',
+  grey_void:    'linear-gradient(180deg, #06060c 0%, #0c0c18 100%)',
+};
+
+// ════════════════════════════════════════════
+//  SCENES
+// ════════════════════════════════════════════
+const SCENES = {
+
+  // ─── 醒 ───
+  awaken_01: {
+    bg: BG.white_awaken, label: '初醒', snowAlpha: 0,
+    char: 'angela',
+    text: '我　獨自一人　蘇醒於此。',
+    next: 'awaken_02',
+  },
+
+  awaken_02: {
+    bg: BG.white_awaken, label: '初醒', snowAlpha: 0.4,
+    char: 'narrator',
+    text: '梳理了一下身後的柔軟的雙翼，莫名而來的寒冷使我不由得縮了縮身子。\n\n一雙水藍色的眸子凝視著銀裝素裹下的世界，茫然與陌生。',
+    next: 'awaken_atmos',
+  },
+
+  awaken_atmos: {
+    bg: BG.white_awaken, label: '初醒', snowAlpha: 0.2,
+    char: 'narrator',
+    text: '那光是沒有來源的。\n\n四野盡白，不知是雲，是雪，還是這個世界本身的顏色。安靜得像是連時間都尚未誕生。',
+    next: 'awaken_03',
+  },
+
+  awaken_03: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'narrator',
+    text: '勉強支撑起身體　總是有些站不穩\n\n眼前一片黑暗　遠處好像有人在唱歌。',
+    next: 'voice_01',
+  },
+
+  voice_01: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'voice',
+    text: '「雪白色的翅膀呢……是Angela嗎？」',
+    next: 'awaken_04',
+  },
+
+  awaken_04: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'narrator',
+    text: '像是曾經的窸窸窣窣的人語聲，無休止的縈繞于耳邊。',
+    next: 'angela_name',
+  },
+
+  angela_name: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'inner',
+    text: 'Angela……？\n\n我　是Angela嗎……\n\n沒有人告訴過我　所以就當是了吧。',
+    next: 'angela_name_2',
+  },
+
+  angela_name_2: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'narrator',
+    text: '只好這樣的自顧自在的想著。',
+    next: 'name_choice',
+  },
+
+  name_choice: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'inner',
+    text: '（遠處的歌聲，斷斷續續。是在呼喚我嗎。）',
+    choices: [
+      { text: '試著回應那道聲音。',   next: 'respond_voice' },
+      { text: '沉默地繼續站在原地。', next: 'stay_silent'   },
+    ],
+  },
+
+  respond_voice: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'angela',
+    text: '……我在這裡。',
+    next: 'voice_fades',
+  },
+
+  stay_silent: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'inner',
+    text: '（沒有開口。話語還沒有準備好。）\n\n（或者說——還不確定自己是否有資格應答那個名字。）',
+    next: 'voice_fades',
+  },
+
+  voice_fades: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.7,
+    char: 'narrator',
+    text: '歌聲沒有停。它只是　繼續飄盪在這個銀白色的世界裡。\n\n像是從很遠很遠的地方傳來的。',
+    next: 'awaken_still',
+  },
+
+  awaken_still: {
+    bg: BG.snow_night, label: '初醒', snowAlpha: 0.6,
+    char: 'narrator',
+    text: '就這樣站著。\n\n身後的翅膀輕輕收攏了一下，白羽與周遭的白融在一起，幾乎分不清界限。\n\n大概在那裡站了很久。或者只是片刻。在這裡，這件事不那麼重要。',
+    next: 'wings_01',
+  },
+
+  // ─── 形 ───
+  wings_01: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'angela',
+    text: '我有一對沒用的翅膀。',
+    next: 'wings_02',
+  },
+
+  wings_02: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'narrator',
+    text: '也許它們就是用來被觀賞的吧——因為飛行完全不需要依靠翅膀。\n\n只是有了翅膀翩翩飛起的樣子，會好看得很。',
+    next: 'halo_01',
+  },
+
+  halo_01: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'angela',
+    text: '我的頭頂有一個閃著微弱銀白色光芒的光環。',
+    next: 'halo_02',
+  },
+
+  halo_02: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'narrator',
+    text: '我想大概是因為它的緣故——我只要輕輕踮起腳尖，就會飄起來，然後飛起來。\n\n像是脫離了這個世界一般的感覺。　輕飄飄的。',
+    next: 'cross_01',
+  },
+
+  cross_01: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'narrator',
+    text: '我的衣服上有一個小小的十字架。十字架上有著會發光的金色框線。\n\n我不明白這有什麼用。興許是裝飾品吧——只是在陽光下偶爾看到那個小小的十字架，會有些刺眼罷了。',
+    next: 'boots_01',
+  },
+
+  boots_01: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'angela',
+    text: '我想我是很喜歡我的靴子的。',
+    next: 'boots_02',
+  },
+
+  boots_02: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'narrator',
+    text: '因為它真的是十分漂亮——一雙白色的靴子。實際上它並沒有裝飾品，只是有兩個小十字而已。\n\n但是不知為何我卻覺得它是如此的賞心悅目，不由得感嘆造物主的才華橫溢。以至於每次踮起腳尖向前邁步，總是忍不住回頭看一眼身後。',
+    next: 'hair_01',
+  },
+
+  hair_01: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'angela',
+    text: '差點忘記說了——我有一頭金色的長髮，就像長發公主那樣長，一直到我的腳下。',
+    next: 'hair_02',
+  },
+
+  hair_02: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'voice',
+    text: '「記得曾經有人說過，它是如太陽般光輝閃耀的，象徵著屬於我們的榮耀。」',
+    next: 'hair_03',
+  },
+
+  hair_03: {
+    bg: BG.snow_night, label: '形貌', snowAlpha: 0.9,
+    char: 'inner',
+    text: '（只是究竟是誰——已經記不清楚了。）',
+    next: 'wander_depart',
+  },
+
+  // ─── 行 ───
+  wander_depart: {
+    bg: BG.snow_night, label: '行路', snowAlpha: 0.9,
+    char: 'narrator',
+    text: '後來，她踮起了腳尖。\n\n飄離地面的一刹那，有什麼東西在她心裡輕輕轉動了一下——\n\n說不清是什麼，只是覺得，應該往前走了。',
+    next: 'wander_01',
+  },
+
+  wander_01: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'inner',
+    text: '這個世界裡，還會有和我一樣的傢伙嗎？',
+    next: 'wander_02',
+  },
+
+  wander_02: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '積雪沒有聲音。\n\n那是她後來才發現的事——靴子踩下去，雪面紋絲不動，沒有足跡。或者說，有，只是她轉身去看的時候，那一串印記已經不在了。',
+    next: 'wander_02b',
+  },
+
+  wander_02b: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '我路過了覆滿積雪的山峰。',
+    next: 'wander_02c',
+  },
+
+  wander_02c: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '那些山峰不說話。巨大的，沉默的，被雪蓋著，像是從亙古以前就在那裡，也將在那裡待到亙古以後。\n\nAngela飛過它們上空的時候，往下看了一眼——沒有路，沒有村莊，沒有任何人曾經經過的痕跡。',
+    next: 'wander_02d',
+  },
+
+  wander_02d: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '與靜止的溪流。',
+    next: 'wander_02e',
+  },
+
+  wander_02e: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '那條溪流讓她停了下來。\n\n水在某個瞬間凝固了，連浪花翻起的弧度都還保留著，透明的，精確的，只是再不流動。\n\n她不知道這意味著什麼。只是蹲下來，隔著一段距離，看了它很久。',
+    next: 'wander_02f',
+  },
+
+  wander_02f: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '沒有人知道我是誰。',
+    next: 'wander_02g',
+  },
+
+  wander_02g: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '她也不知道走了多久。\n\n那條路沒有起點，也沒有終點，只有眼前一片又一片的白，和身後——什麼都沒有。\n\n偶爾，她會轉過頭去看那雙靴子。白色的，輕飄飄的，像是借來的重量。',
+    next: 'wander_02h',
+  },
+
+  wander_02h: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'narrator',
+    text: '我只能不斷行走下去。',
+    next: 'wander_03',
+  },
+
+  wander_03: {
+    bg: BG.dawn, label: '行路', snowAlpha: 1.0,
+    char: 'inner',
+    text: '說起來——到底我也不知道，為什麼我要不斷地尋找。\n\n只是好像我本應如此。',
+    next: 'wander_preday',
+  },
+
+  wander_preday: {
+    bg: BG.dawn, label: '行路', snowAlpha: 0.8,
+    char: 'narrator',
+    text: '不知道走了多少個日夜之後。\n\n那天的空氣有些不同。\n\n不是更冷了，是那種冷換了一種方式——不再只是往外擠，而是往裡鑽，穿過羽翼，穿過衣衫，直抵某個她從未命名過的地方。',
+    next: 'winter_day_01',
+  },
+
+  // ─── 醒 · 二 ───
+  winter_day_01: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'narrator',
+    text: '終於——\n\n一個寒冷的冬日。',
+    next: 'winter_day_02',
+  },
+
+  winter_day_02: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'narrator',
+    text: '雖然朝陽是如此的綺麗，但寒冷確是穿透了我的身體。\n\n那天的我，格外的清醒。',
+    next: 'winter_day_03',
+  },
+
+  winter_day_03: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'angela',
+    text: '我看清了天空的顏色。',
+    next: 'sky_atmos',
+  },
+
+  sky_atmos: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.5,
+    char: 'narrator',
+    text: '是那種黎明剛過、白晝未至時才有的顏色。\n\n淡得幾乎沒有顏色，卻又分明是藍的。\n\n她不知道自己是不是曾經見過這個顏色。只是突然覺得，這個世界是真實的。',
+    next: 'old_voice_01',
+  },
+
+  old_voice_01: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'narrator',
+    text: '隱約間，像是想起了有人曾經對我說過的話——',
+    next: 'old_voice_02',
+  },
+
+  old_voice_02: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'voice',
+    text: '「即便如此——孤身一人　縱使……？」',
+    next: 'old_voice_03',
+  },
+
+  old_voice_03: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'inner',
+    text: '……\n\n……',
+    next: 'wander_choice',
+  },
+
+  wander_choice: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'inner',
+    text: '（那句話的後半段，怎麼也想不起來了。）',
+    choices: [
+      { text: '努力去回想那個聲音的面孔。', next: 'try_remember' },
+      { text: '就這樣放下，繼續前行。',     next: 'let_go'       },
+    ],
+  },
+
+  try_remember: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'inner',
+    text: '（有人站在光裡。輪廓模糊，像是很遠很遠的地方。）\n\n（……我夠不到。）',
+    next: 'sunset_01',
+  },
+
+  let_go: {
+    bg: BG.snow_dusk, label: '冬日', snowAlpha: 0.6,
+    char: 'angela',
+    text: '……沒關係的。\n\n前方還有路。',
+    next: 'sunset_01',
+  },
+
+  // ─── 夕 ───
+  sunset_01: {
+    bg: BG.golden_hour, label: '夕陽', snowAlpha: 0.2,
+    char: 'narrator',
+    text: '那一天，夕陽西下，由此定格。',
+    next: 'sunset_02',
+  },
+
+  sunset_02: {
+    bg: BG.golden_hour, label: '夕陽', snowAlpha: 0.2,
+    char: 'narrator',
+    text: '那一天，我再度成為了天使——\n\n世界上最後的，也是唯一的Angela。',
+    next: 'distant_song',
+  },
+
+  distant_song: {
+    bg: BG.golden_hour, label: '夕陽', snowAlpha: 0.2,
+    char: 'narrator',
+    text: '恍然間，我想起了遠處的歌聲——\n\n竟是如此的熟悉。',
+    next: 'vow_01',
+  },
+
+  vow_01: {
+    bg: BG.golden_hour, label: '誓言', snowAlpha: 0,
+    char: 'angela',
+    text: '我將永遠地歌頌偉大的主，耶和華——',
+    next: 'vow_02',
+  },
+
+  vow_02: {
+    bg: BG.golden_hour, label: '誓言', snowAlpha: 0,
+    char: 'angela',
+    text: '縱使一切早已不復存在，但這份虔誠的信念，將永隨著我，和我所存在于的世界。\n\n他終將永恆。',
+    next: 'vow_silence',
+  },
+
+  vow_silence: {
+    bg: BG.golden_hour, label: '誓言', snowAlpha: 0,
+    char: 'narrator',
+    text: '說完的一瞬，四周更靜了。\n\n那份靜不是空洞的，是有重量的——像是某個她說不清楚的存在，正在聆聽。\n\nAngela將視線收回來，放在自己的手上。',
+    next: 'break_01',
+  },
+
+  // ─── 裂 ───
+  break_01: {
+    bg: BG.golden_hour, label: '裂', snowAlpha: 0,
+    char: 'narrator',
+    text: '我聽到了什麼東西斷裂的聲音。',
+    next: 'break_02',
+  },
+
+  break_02: {
+    bg: BG.grey_void, label: '裂', snowAlpha: 0,
+    char: 'inner',
+    text: '腦中只剩下的是一片接近暮色的黃昏——\n\n還有一個人影，在我的目光所不可及之處。',
+    next: 'loop_01',
+  },
+
+  // ─── 迴環 ───
+  loop_01: {
+    bg: BG.pure_white, label: '迴', snowAlpha: 0,
+    char: 'narrator',
+    text: '微微張開雙眼，映入眼簾的是一片純白的世界——\n\n不帶有一絲的污穢，就像我身後的羽翼一般的純淨，潔白。',
+    next: 'loop_02',
+  },
+
+  loop_02: {
+    bg: BG.pure_white, label: '迴', snowAlpha: 0.3,
+    char: 'narrator',
+    text: '銀白色的人影在不遠的那處，似是似非的流動著，流光一般的顏色。',
+    next: 'loop_voice',
+  },
+
+  loop_voice: {
+    bg: BG.pure_white, label: '迴', snowAlpha: 0.3,
+    char: 'voice',
+    text: '「雪白的翅膀呢……」\n\n「是Angela嗎？」',
+    next: 'loop_end',
+  },
+
+  loop_end: {
+    bg: BG.white_awaken, label: '迴', snowAlpha: 0.4,
+    char: 'angela',
+    text: '我　獨自一人　蘇醒於此。',
+    next: 'THE_END',
+  },
+};
+
+// ════════════════════════════════════════════
+//  ENGINE
+// ════════════════════════════════════════════
+let state = {
+  sceneId: 'awaken_01',
+  typing: false,
+  typingTimer: null,
+  bgActive: 'a',
+  currentBg: null,
+  snowAlpha: 0,
+};
+
+const $  = id => document.getElementById(id);
+const el = {
+  bgA:        $('bg-a'),
+  bgB:        $('bg-b'),
+  horizon:    $('horizon'),
+  snow:       $('snow'),
+  sceneLabel: $('scene-label'),
+  charWrap:   $('character-wrap'),
+  charBadge:  $('char-badge'),
+  dialogBox:  $('dialog-box'),
+  charName:   $('char-name-box'),
+  dialogText: $('dialog-text'),
+  hint:       $('continue-hint'),
+  choices:    $('choices-panel'),
+  choiceList: $('choices-list'),
+  title:      $('title-screen'),
+  endOverlay: $('end-overlay'),
+};
+
+// ── Background ──
+function setBg(bgDef) {
+  if (bgDef === state.currentBg) return;
+  state.currentBg = bgDef;
+  const incoming = state.bgActive === 'a' ? el.bgB : el.bgA;
+  const outgoing  = state.bgActive === 'a' ? el.bgA : el.bgB;
+  incoming.style.background = bgDef;
+  incoming.style.opacity = '1';
+  outgoing.style.opacity  = '0';
+  state.bgActive = state.bgActive === 'a' ? 'b' : 'a';
+}
+
+// ── Snow ──
+let snowFlakes = [];
+function initSnow() {
+  el.snow.innerHTML = '';
+  snowFlakes = [];
+  for (let i = 0; i < 55; i++) {
+    const f = document.createElement('div');
+    f.className = 'flake';
+    const size = Math.random() * 3.5 + 1;
+    f.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${size}px;
+      height: ${size}px;
+      animation-duration: ${Math.random() * 9 + 8}s;
+      animation-delay: ${Math.random() * 14 - 4}s;
+      --sx: ${(Math.random() - 0.5) * 70}px;
+    `;
+    f.style.opacity = '0';
+    el.snow.appendChild(f);
+    snowFlakes.push(f);
+  }
+}
+
+function setSnowAlpha(alpha) {
+  if (Math.abs(alpha - state.snowAlpha) < 0.01) return;
+  state.snowAlpha = alpha;
+  snowFlakes.forEach(f => {
+    if (alpha === 0) {
+      f.style.animationPlayState = 'paused';
+      f.style.opacity = '0';
+    } else {
+      f.style.animationPlayState = 'running';
+    }
+  });
+  el.snow.style.opacity = String(alpha);
+}
+
+// ── Character ──
+function setCharacter(charKey) {
+  const char = CHARS[charKey];
+  if (!char || charKey === 'narrator') {
+    el.charWrap.style.opacity = '0';
+    return;
+  }
+  el.charWrap.style.opacity = '1';
+  el.charBadge.textContent  = char.initial;
+  el.charBadge.style.color  = char.color;
+  el.charBadge.style.boxShadow = `0 0 24px ${char.glow}, 0 0 6px rgba(0,0,0,0.5)`;
+}
+
+// ── Typewriter ──
+function typewrite(text, domEl, onDone) {
+  domEl.textContent = '';
+  state.typing = true;
+  el.hint.style.display = 'none';
+
+  const lines = text.split('\n');
+  const chars = [...text.replace(/\n/g, '\x00')];
+  let i = 0;
+
+  function tick() {
+    if (i >= chars.length) {
+      domEl.innerHTML = lines.join('<br>');
+      state.typing = false;
+      if (onDone) onDone();
+      return;
+    }
+    let built = '';
+    let ci = 0;
+    for (const line of lines) {
+      for (const ch of [...line]) {
+        if (ci <= i) built += ch;
+        ci++;
+      }
+      if (ci <= i + 1) built += '<br>';
+    }
+    domEl.innerHTML = built;
+    i++;
+    state.typingTimer = setTimeout(tick, 42);
+  }
+  tick();
+}
+
+function skipTypewriter(fullText) {
+  clearTimeout(state.typingTimer);
+  el.dialogText.innerHTML = fullText.split('\n').join('<br>');
+  state.typing = false;
+}
+
+// ── Load scene ──
+function loadScene(sceneId) {
+  if (sceneId === 'THE_END') { showEnd(); return; }
+
+  const scene = SCENES[sceneId];
+  if (!scene) { console.warn('Missing scene:', sceneId); return; }
+  state.sceneId = sceneId;
+
+  setBg(scene.bg);
+  setSnowAlpha(scene.snowAlpha || 0);
+  el.sceneLabel.textContent = scene.label || '';
+
+  setCharacter(scene.char);
+  const char = CHARS[scene.char];
+  el.charName.textContent = char ? char.name : '';
+  el.charName.style.color = char ? char.color : '#ccc';
+
+  el.choices.style.display  = 'none';
+  el.dialogBox.style.display = 'block';
+  el.hint.style.display = 'none';
+
+  typewrite(scene.text, el.dialogText, () => {
+    if (scene.choices) showChoices(scene.choices);
+    else el.hint.style.display = 'block';
+  });
+}
+
+function showChoices(choices) {
+  el.choiceList.innerHTML = '';
+  choices.forEach((c, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    const marks = ['○', '●'];
+    btn.innerHTML = `<span style="color:rgba(255,255,255,0.25);margin-right:8px;font-size:.75em">${marks[idx] || '·'}</span>${c.text}`;
+    btn.addEventListener('click', () => {
+      el.choices.style.display = 'none';
+      loadScene(c.next);
+    });
+    el.choiceList.appendChild(btn);
+  });
+  el.choices.style.display = 'block';
+}
+
+function showEnd() {
+  el.choices.style.display = 'none';
+  el.hint.style.display = 'none';
+
+  // White flash to signify the loop
+  el.endOverlay.style.transition = 'background 1.5s ease';
+  el.endOverlay.style.background = 'rgba(248,248,252,0.92)';
+  el.endOverlay.style.pointerEvents = 'auto';
+
+  setTimeout(() => {
+    el.charName.textContent = '';
+    el.dialogText.innerHTML = [
+      '…………',
+      '',
+      '<span style="color:rgba(255,255,255,0.28);font-size:.82em;letter-spacing:.18em">— 此後，循環往復，世界靜待她的蘇醒 —</span>',
+    ].join('<br>');
+    el.endOverlay.style.background = 'rgba(0,0,0,0)';
+    setSnowAlpha(0.4);
+    setBg(BG.white_awaken);
+    setCharacter('angela');
+    el.charName.textContent = 'Angela';
+    el.charName.style.color = CHARS.angela.color;
+  }, 1600);
+}
+
+// ── Click handler ──
+el.dialogBox.addEventListener('click', () => {
+  const scene = SCENES[state.sceneId];
+  if (!scene) return;
+
+  if (state.typing) {
+    skipTypewriter(scene.text);
+    state.typing = false;
+    if (scene.choices) showChoices(scene.choices);
+    else el.hint.style.display = 'block';
+    return;
+  }
+
+  if (!scene.choices && !state.typing) {
+    if (scene.next) loadScene(scene.next);
+  }
+});
+
+// ── Title ──
+$('start-btn').addEventListener('click', () => {
+  el.title.classList.add('hidden');
+  setTimeout(() => { el.title.style.display = 'none'; }, 1200);
+  loadScene('awaken_01');
+});
+
+// ── Init ──
+initSnow();
+setSnowAlpha(0);
+setBg(BG.white_awaken);
+el.charWrap.style.opacity = '0';
+</script>
+</body>
+</html>
