@@ -961,7 +961,7 @@ let _lastClick = 0;
 function playClick() {
   if (!audioCtx || musicMuted) return;
   const now = audioCtx.currentTime;
-  if (now - _lastClick < 0.12) return;
+  if (now - _lastClick < 0.5) return;
   _lastClick = now;
 
   function noiseBuf(ms, decay) {
