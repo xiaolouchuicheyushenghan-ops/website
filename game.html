@@ -957,27 +957,46 @@ function initAudio() {
   }, 5000);
 }
 
+let _lastClick = 0;
 function playClick() {
   if (!audioCtx || musicMuted) return;
-  // 机械打字机：短噪声脉冲 + 带通滤波，复古质感
-  const bufLen = Math.floor(audioCtx.sampleRate * 0.022);
+  const now = audioCtx.currentTime;
+  if (now - _lastClick < 0.07) return; // 节流：70ms最多触发一次
+  _lastClick = now;
+
+  // 低频沉稳"嗒"——旧式机械键
+  const bufLen = Math.floor(audioCtx.sampleRate * 0.014);
   const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
   const d = buf.getChannelData(0);
   for (let i = 0; i < bufLen; i++) {
-    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 2.5);
+    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 5);
   }
   const src = audioCtx.createBufferSource();
   src.buffer = buf;
-  const bpf = audioCtx.createBiquadFilter();
-  bpf.type = 'bandpass';
-  bpf.frequency.value = 720;
-  bpf.Q.value = 0.7;
+
+  const lpf = audioCtx.createBiquadFilter();
+  lpf.type = 'lowpass';
+  lpf.frequency.value = 420;
+
   const g = audioCtx.createGain();
-  g.gain.value = 0.055;
-  src.connect(bpf);
-  bpf.connect(g);
+  g.gain.value = 0.028;
+
+  src.connect(lpf);
+  lpf.connect(g);
   g.connect(audioCtx.destination);
-  src.start();
+  src.start(now);
+
+  // 极轻的金属余韵
+  const tick = audioCtx.createOscillator();
+  const tg = audioCtx.createGain();
+  tick.type = 'sine';
+  tick.frequency.value = 3200;
+  tg.gain.setValueAtTime(0.005, now);
+  tg.gain.exponentialRampToValueAtTime(0.0001, now + 0.012);
+  tick.connect(tg);
+  tg.connect(audioCtx.destination);
+  tick.start(now);
+  tick.stop(now + 0.013);
 }
 
 function toggleMusic() {
@@ -1250,10 +1269,17 @@ $('start-btn').addEventListener('click', () => {
 // ── DLC navigation (works on htmlpreview + local) ──
 function openDLC(dlcFile) {
   const href = window.location.href;
+  // htmlpreview 实际渲染时 location 是 raw.githubusercontent.com
+  if (href.includes('raw.githubusercontent.com')) {
+    const dlcRaw = href.replace(/\/[^/?#]+\.html.*$/, '/' + dlcFile);
+    window.location.href = 'https://htmlpreview.github.io/?' + encodeURIComponent(dlcRaw);
+    return;
+  }
+  // 直接在 htmlpreview 域名下
   if (href.includes('htmlpreview.github.io')) {
     const rawUrl = decodeURIComponent(href.split('?')[1] || '');
     if (rawUrl) {
-      const dlcRaw = rawUrl.replace(/\/[^/]+\.html(\?.*)?$/, '/' + dlcFile);
+      const dlcRaw = rawUrl.replace(/\/[^/?#]+\.html.*$/, '/' + dlcFile);
       window.location.href = 'https://htmlpreview.github.io/?' + encodeURIComponent(dlcRaw);
       return;
     }
