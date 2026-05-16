@@ -961,7 +961,7 @@ let _lastClick = 0;
 function playClick() {
   if (!audioCtx || musicMuted) return;
   const now = audioCtx.currentTime;
-  if (now - _lastClick < 0.065) return;
+  if (now - _lastClick < 0.12) return;
   _lastClick = now;
 
   function noiseBuf(ms, decay) {
@@ -984,10 +984,10 @@ function playClick() {
 
   // 层2：键帽落板"嗒" — 低通噪声 380Hz，4ms后触发
   const s2 = audioCtx.createBufferSource();
-  s2.buffer = noiseBuf(16, 2);
+  s2.buffer = noiseBuf(16, 4);
   const f2 = audioCtx.createBiquadFilter();
   f2.type = 'lowpass'; f2.frequency.value = 200;
-  const g2 = audioCtx.createGain(); g2.gain.value = 0.03;
+  const g2 = audioCtx.createGain(); g2.gain.value = 0.025;
   s2.connect(f2); f2.connect(g2); g2.connect(audioCtx.destination);
   s2.start(now + 0.004);
 }
