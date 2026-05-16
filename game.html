@@ -975,18 +975,18 @@ function playClick() {
 
   // 层1：触发点"涩感" — 带通噪声 1300Hz，模拟轴体摩擦的粗糙感
   const s1 = audioCtx.createBufferSource();
-  s1.buffer = noiseBuf(12, 1);
+  s1.buffer = noiseBuf(12, 0.5);
   const f1 = audioCtx.createBiquadFilter();
-  f1.type = 'bandpass'; f1.frequency.value = 1300; f1.Q.value = 3;
+  f1.type = 'bandpass'; f1.frequency.value = 1300; f1.Q.value = 4;
   const g1 = audioCtx.createGain(); g1.gain.value = 0.05;
   s1.connect(f1); f1.connect(g1); g1.connect(audioCtx.destination);
   s1.start(now);
 
   // 层2：键帽落板"嗒" — 低通噪声 380Hz，4ms后触发
   const s2 = audioCtx.createBufferSource();
-  s2.buffer = noiseBuf(16, 4);
+  s2.buffer = noiseBuf(16, 2);
   const f2 = audioCtx.createBiquadFilter();
-  f2.type = 'lowpass'; f2.frequency.value = 380;
+  f2.type = 'lowpass'; f2.frequency.value = 200;
   const g2 = audioCtx.createGain(); g2.gain.value = 0.03;
   s2.connect(f2); f2.connect(g2); g2.connect(audioCtx.destination);
   s2.start(now + 0.004);
