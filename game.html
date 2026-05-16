@@ -488,6 +488,7 @@ const CHARS = {
   inner:    { name: '〔内心〕',        color: '#ffd166', initial: '心',  glow: 'rgba(255,209,102,0.3)' },
   hua:      { name: '华·洛佩兹',      color: '#e8704a', initial: '华',  glow: 'rgba(232,112,74,0.35)' },
   leian:    { name: '莱安·斯图尔特',  color: '#52b788', initial: '莱',  glow: 'rgba(82,183,136,0.35)' },
+  eve:      { name: '伊芙·洛佩兹',    color: '#f4a261', initial: '伊',  glow: 'rgba(244,162,97,0.35)' },
 };
 
 const BG = {
@@ -551,6 +552,20 @@ const SCENES = {
     bg: BG.hall_day, label: 'A学院 · 主楼大厅',
     char: 'narrator', initial: false,
     text: '大厅里已经聚集了许多新生。西装革履的，锦衣华服的，也有像他这样穿着朴素的——\n\n但大多数人都低着头，各自心事重重。',
+    next: 'gate_eve',
+  },
+
+  gate_eve: {
+    bg: BG.hall_day, label: 'A学院 · 主楼大厅',
+    char: 'narrator', initial: false,
+    text: '人群里有一个人和其他所有人都不一样——\n\n她推着行李箱，挥着手和每一个路过的人打招呼，仿佛来的不是魔法学院，是什么野餐活动。锤形的法器随意挂在包侧，晃啊晃的。',
+    next: 'gate_eve_02',
+  },
+
+  gate_eve_02: {
+    bg: BG.hall_day, label: 'A学院 · 主楼大厅',
+    char: 'inner',
+    text: '（华·洛佩兹认识她。）\n\n（他没有走过去。）',
     next: 'gate_choice',
   },
 
@@ -620,6 +635,13 @@ const SCENES = {
     bg: BG.corridor, label: 'A学院 · 走廊',
     char: 'leian', initial: true,
     text: '你在这里站了很久了。',
+    next: 'encounter_01b',
+  },
+
+  encounter_01b: {
+    bg: BG.corridor, label: 'A学院 · 走廊',
+    char: 'narrator', initial: false,
+    text: '他说这话的时候，微微笑着。\n\n不是友善，是一种已经知道答案、还是问出来的平静。',
     next: 'encounter_02',
   },
 
@@ -737,7 +759,7 @@ const SCENES = {
   epilogue: {
     bg: BG.end_screen, label: '序章 · 终',
     char: 'narrator', initial: false,
-    text: '这是2019年，深秋，入学之日。\n\n华·洛佩兹和莱安·斯图尔特，在还不知道彼此会如何改变对方命运的时候，第一次站在了同一条走廊上。',
+    text: '这是2019年，深秋，入学之日。\n\n华·洛佩兹和莱安·斯图尔特，在还不知道彼此会如何改变对方命运的时候，第一次站在了同一条走廊上。\n\n而在大厅某处，伊芙·洛佩兹还在和陌生人打招呼。',
     next: 'THE_END',
   },
 };
